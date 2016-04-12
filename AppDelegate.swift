@@ -7,6 +7,13 @@
 //
 
 import UIKit
+import Parse
+import Bolts
+import SwiftyJSON
+import Alamofire
+import Mapbox
+
+
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,6 +23,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        let configuration = ParseClientConfiguration{
+            $0.applicationId = "JiQvdbCCE5b0ltKQhwwDwhvSuqzfFbN9L3r9ZFRL"
+            $0.clientKey = "zpZdvuHZUDX7vopnYBMWCrLpbeVS4QnhxGJkUZCo"
+        }
+            Parse.initializeWithConfiguration(configuration)
+        
         return true
     }
 
