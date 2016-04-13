@@ -8,6 +8,7 @@
 
 import UIKit
 import Mapbox
+import Alamofire
 
 class MapViewController: UIViewController, MGLMapViewDelegate {
     
@@ -30,6 +31,7 @@ class MapViewController: UIViewController, MGLMapViewDelegate {
         mapView.setCenterCoordinate(center, zoomLevel: 5, direction: 180, animated: false)
         
         
+        self.mapView.userTrackingMode = MGLUserTrackingMode.FollowWithCourse
         
         
         
@@ -45,7 +47,7 @@ class MapViewController: UIViewController, MGLMapViewDelegate {
         
         let camera = MGLMapCamera(lookingAtCenterCoordinate: mapView.centerCoordinate, fromDistance: 9000, pitch: 45, heading: 0)
         
-        mapView.setCamera(camera, withDuration: 10, animationTimingFunction: CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut))
+        mapView.setCamera(camera, withDuration: 3, animationTimingFunction: CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut))
         
     }
     
@@ -53,6 +55,7 @@ class MapViewController: UIViewController, MGLMapViewDelegate {
         // Always try to show a callout when an annotation is tapped.
         return true
     }
+    
     
 
     

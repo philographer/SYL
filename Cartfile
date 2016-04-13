@@ -1,3 +1,4 @@
 github "Alamofire/Alamofire" ~> 3.0
 github "SwiftyJSON/SwiftyJSON"
 github "ParsePlatform/Parse-SDK-iOS-OSX"
+github "xmartlabs/Eureka" ~> 1.5
