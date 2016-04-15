@@ -30,24 +30,20 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     let kOpenCellHeight: CGFloat = 488
     let kRowsCount = 1
     var cellHeights = [CGFloat]()
-
+    var map:MGLMapView?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
-        
-        
         //mapbox
-        let mapView = MGLMapView(frame: self.MapView.bounds,
-                                 styleURL: MGLStyle.lightStyleURL())
-        mapView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
+        map = MGLMapView(frame: self.MapView.bounds,
+                             styleURL: MGLStyle.lightStyleURL())
+        map!.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
         //set the map's center coordinate
-        mapView.setCenterCoordinate(CLLocationCoordinate2D(latitude: 40.7326808,
+        /*map!.setCenterCoordinate(CLLocationCoordinate2D(latitude: 40.7326808,
             longitude: -73.9843407),zoomLevel: 12, animated: false)
-        self.MapView.addSubview(mapView)
-        mapView.attributionButton.hidden = true
-        
-        
+        */
+        map!.attributionButton.hidden = true
+        self.MapView.addSubview(map!)
         //Collapsible Table
         createCellHeightsArray()
         self.tableView.backgroundColor = UIColor(patternImage: UIImage(named: "background")!)
@@ -71,7 +67,34 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         self.floatBtn.addItem("의료", icon: UIImage(named: "icMap")!, handler: {item in
             self.performSegueWithIdentifier("writeViewController", sender: self)
             print("의료")})
+        
+        //print(PFUser.currentUser()!["name"])
     }
+    
+    
+    
+    override func viewWillAppear(animated: Bool) {
+        print(PFUser.currentUser())
+        //회원가입 안 했으면 메인으로
+        if(PFUser.currentUser() == nil){
+            self.performSegueWithIdentifier("FromMainToSign", sender: self)
+            print("노아이디")
+        }
+        else{
+            map!.userTrackingMode = MGLUserTrackingMode.FollowWithHeading
+            print(map!.userLocation?.coordinate)
+            //let camera = MGLMapCamera(lookingAtCenterCoordinate: (map!.userLocation?.coordinate)!, fromDistance: 9000, pitch: 45, heading: 0)
+            //map!.setCamera(camera, withDuration: 3, animationTimingFunction: CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut))
+        }
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        print(map!.userLocation?.coordinate)
+    }
+    
+    
+    
+    
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -157,10 +180,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 self.view.layoutIfNeeded()}, completion: {
                     finished in print("지도 접기")
                     self.floatBtn.openAnimationType = KCFABOpenAnimationType.SlideUp
-                    
-                    
-                    //self.view.addConstraint(floatBtnConstraint)
-                    
             })
         }
         else if(collapsibleConstraint.constant == 0){

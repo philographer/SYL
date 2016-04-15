@@ -5,4 +5,4 @@ github "xmartlabs/Eureka" ~> 1.5
 github "DaveWoodCom/XCGLogger" ~> 3.3
 github "kciter/KCFloatingActionButton"
 github "hyperoslo/ImagePicker"
-
+github "vikmeup/SCLAlertView-Swift"

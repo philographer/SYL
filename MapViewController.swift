@@ -27,11 +27,10 @@ class MapViewController: UIViewController, MGLMapViewDelegate {
         point.title = "Voodoo Doughnut"
         point.subtitle = "22 SW 3rd Avenenue"
         mapView.addAnnotation(point)
-        
         mapView.setCenterCoordinate(center, zoomLevel: 5, direction: 180, animated: false)
         
         
-        self.mapView.userTrackingMode = MGLUserTrackingMode.FollowWithCourse
+        self.mapView.userTrackingMode = MGLUserTrackingMode.FollowWithHeading
         
         
         
@@ -44,17 +43,18 @@ class MapViewController: UIViewController, MGLMapViewDelegate {
     }
     
     override func viewDidAppear(animated: Bool) {
-        
         let camera = MGLMapCamera(lookingAtCenterCoordinate: mapView.centerCoordinate, fromDistance: 9000, pitch: 45, heading: 0)
         
         mapView.setCamera(camera, withDuration: 3, animationTimingFunction: CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut))
-        
     }
     
     func mapView(mapView: MGLMapView, annotationCanShowCallout annotation: MGLAnnotation) -> Bool {
         // Always try to show a callout when an annotation is tapped.
         return true
     }
+    
+    
+
     
     
 
