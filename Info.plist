@@ -34,6 +34,8 @@
 	</array>
 	<key>MGLMapboxAccessToken</key>
 	<string>pk.eyJ1IjoieW9vaG9vZ3VuMTE0IiwiYSI6ImNpZnFzaGw5N2lpNXRyN2x4eGR2dHUyeHIifQ.j6mkgVQo4-gRMItnenATsA</string>
+	<key>MGLMapboxMetricsEnabledSettingShownInApp</key>
+	<true/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

@@ -8,29 +8,69 @@
 
 import UIKit
 import Parse
+import Mapbox
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, KCFloatingActionButtonDelegate {
     
+    //LayOut Outlet
+    @IBOutlet weak var MapView: UIView!
+    @IBOutlet weak var collapsibleConstraint: NSLayoutConstraint!
+    @IBOutlet weak var ArticleView: UIView!
+    @IBOutlet var tableView: UITableView!
+    @IBOutlet weak var floatBtn: KCFloatingActionButton!
+    @IBOutlet weak var collapseBtn: UIButton!
+    @IBOutlet weak var daumLogo: UIImageView!
+    @IBOutlet weak var collapseBtnConstraint: NSLayoutConstraint!
+    @IBOutlet var floatBtnConstraint: NSLayoutConstraint!
+    @IBOutlet var floatBtnConstraintBottom: NSLayoutConstraint!
+    
+    //KFloat Button
     let kCloseCellHeight: CGFloat = 179
     let kOpenCellHeight: CGFloat = 488
-    let kRowsCount = 10
+    let kRowsCount = 1
     var cellHeights = [CGFloat]()
-    @IBOutlet var tableView: UITableView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        let testObject = PFObject(className: "TestObject")
-        testObject["foo"] = "bar"
-        testObject.saveInBackgroundWithBlock { (success: Bool, error: NSError?) -> Void in
-            print("Object has been saved.")
-        }
         
         
+        
+        
+        //mapbox
+        let mapView = MGLMapView(frame: self.MapView.bounds,
+                                 styleURL: MGLStyle.lightStyleURL())
+        mapView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
+        //set the map's center coordinate
+        mapView.setCenterCoordinate(CLLocationCoordinate2D(latitude: 40.7326808,
+            longitude: -73.9843407),zoomLevel: 12, animated: false)
+        self.MapView.addSubview(mapView)
+        mapView.attributionButton.hidden = true
+        
+        
+        //Collapsible Table
         createCellHeightsArray()
         self.tableView.backgroundColor = UIColor(patternImage: UIImage(named: "background")!)
         tableView.dataSource = self
         tableView.delegate = self
+        
+        //KFloat Button Add Item
+        self.floatBtn.openAnimationType = KCFABOpenAnimationType.SlideDown
+        self.floatBtn.addItem("기타", icon: UIImage(named: "icMap")!, handler: {item in
+            self.performSegueWithIdentifier("writeViewController", sender: self)
+            print("기타")})
+        self.floatBtn.addItem("범죄", icon: UIImage(named: "icShare")!, handler: {item in
+            self.performSegueWithIdentifier("writeViewController", sender: self)
+            print("범죄")})
+        self.floatBtn.addItem("사고", icon: UIImage(named: "icMap")!, handler: {item in
+            self.performSegueWithIdentifier("writeViewController", sender: self)
+            print("사고")})
+        self.floatBtn.addItem("물자", icon: UIImage(named: "icMap")!, handler: {item in
+            self.performSegueWithIdentifier("writeViewController", sender: self)
+            print("물자")})
+        self.floatBtn.addItem("의료", icon: UIImage(named: "icMap")!, handler: {item in
+            self.performSegueWithIdentifier("writeViewController", sender: self)
+            print("의료")})
     }
 
     override func didReceiveMemoryWarning() {
@@ -48,7 +88,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     // MARK: - Table view data source
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return 1
     }
     
     func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
@@ -105,7 +145,38 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     
-
-
+    @IBAction func collapseAction(sender: AnyObject) {
+        if(collapsibleConstraint.constant == 197)
+        {
+            
+            UIView.animateWithDuration(0.3, delay: 0, options: .CurveEaseIn, animations: {
+                self.floatBtnConstraint.active = false
+                self.MapView.alpha = 0
+                self.collapsibleConstraint.constant = 0
+                self.collapseBtnConstraint.constant = 100
+                self.view.layoutIfNeeded()}, completion: {
+                    finished in print("지도 접기")
+                    self.floatBtn.openAnimationType = KCFABOpenAnimationType.SlideUp
+                    
+                    
+                    //self.view.addConstraint(floatBtnConstraint)
+                    
+            })
+        }
+        else if(collapsibleConstraint.constant == 0){
+            UIView.animateWithDuration(0.3, delay: 0, options: .CurveEaseIn, animations: {
+                self.floatBtnConstraint.active = true
+                self.MapView.alpha = 1
+                self.collapsibleConstraint.constant = 197
+                self.collapseBtnConstraint.constant = 245
+                self.view.layoutIfNeeded()}, completion: {
+                    finished in print("지도 펴기")
+                    self.floatBtn.openAnimationType = KCFABOpenAnimationType.SlideDown
+                    
+                    
+                    //self.view.removeConstraint(floatBtnConstraint)
+                    
+            })
+        }
+    }
 }
-

@@ -12,6 +12,7 @@ import Bolts
 import SwiftyJSON
 import Alamofire
 import Mapbox
+import XCGLogger
 
 
 
@@ -19,6 +20,10 @@ import Mapbox
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    let log = XCGLogger.defaultInstance()
+    
+    
+
 
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
@@ -28,6 +33,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             $0.clientKey = "zpZdvuHZUDX7vopnYBMWCrLpbeVS4QnhxGJkUZCo"
         }
             Parse.initializeWithConfiguration(configuration)
+        
+        let cacheDirectory: NSURL = {
+            let urls = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask)
+            return urls[urls.endIndex - 1]
+        }()
+        let logPath: NSURL = cacheDirectory.URLByAppendingPathComponent("app.log")
+        log.setup(.Debug, showThreadName: true, showLogLevel: true, showFileNames: true, showLineNumbers: true, writeToFile: logPath, fileLogLevel: .Debug)
+        //log.setup(.Debug, showThreadName: true, showLogLevel: true, showFileNames: true, showLineNumbers: true, writeToFile: "path/to/file", fileLogLevel: .Debug)
+        
         
         return true
     }
