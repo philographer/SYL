@@ -9,6 +9,7 @@
 import UIKit
 import Parse
 import ImagePicker
+import Toucan
 
 class SignUpViewController: UIViewController, ImagePickerDelegate {
 
@@ -22,6 +23,9 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.hideKeyboardWhenTappedAround()
+        
+        self.viewUpByKeyboard()
         
         // Do any additional setup after loading the view.
     }
@@ -42,7 +46,7 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
     func doneButtonDidPress(images: [UIImage]) {
         print("done")
         self.userSelectImages = images
-        self.userPhoto.image = images[0]
+        self.userPhoto.image = Toucan(image: images[0]).maskWithEllipse(borderWidth: 10, borderColor: UIColor.grayColor()).image
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
@@ -58,7 +62,7 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
     }
     
     @IBAction func SignUpAction(sender: AnyObject) {
-        
+        self.view.endEditing(true)
         let UUID:String = (UIDevice.currentDevice().identifierForVendor?.UUIDString)!
         
         //회원가입할 유저정보 집어넣음
@@ -66,8 +70,6 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
         user.username = UUID
         user.password = UUID
         user["name"] = self.userNameField.text
-        
-        
         
         UIView.animateWithDuration(1.5, delay: 0, options: .CurveEaseIn, animations: {
             self.imageSelecBtn.alpha = 0
@@ -88,10 +90,9 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
                     (user: PFUser?, error: NSError?) -> Void in
                     if user != nil { //로그인 성공했을때
                         //이미지 세팅
-                        let imageData = UIImageJPEGRepresentation(self.userPhoto.image!, 0.5)
-                        
+                        let imageData = UIImageJPEGRepresentation(self.userPhoto.image!, 0.1)
                         //let imageData = UIImagePNGRepresentation(self.userPhoto.image!)
-                        let imageFile = PFFile(name:"image.png", data:imageData!)!
+                        let imageFile = PFFile(name:"image.jpg", data:imageData!)!
                         //이미지 업로드
                         imageFile.saveInBackgroundWithBlock({
                             (succeeded: Bool, error: NSError?) -> Void in
@@ -119,6 +120,8 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
             })
         
     }
+    
+    
 
     /*
     // MARK: - Navigation

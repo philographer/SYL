@@ -9,18 +9,24 @@
 import UIKit
 import Mapbox
 import Parse
+import ImagePicker
 
-class WriteViewController: UIViewController {
+class WriteViewController: UIViewController, ImagePickerDelegate {
 
     @IBOutlet var MapView: UIView!
     @IBOutlet var writeButton: UIButton!
     @IBOutlet var textView: UITextView!
+    @IBOutlet var progressBar: UIProgressView!
     
     var map:MGLMapView?
+    var category:String!
+    var userSelectImages: [UIImage]?
+    @IBOutlet var userSelectImage: UIImageView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.hideKeyboardWhenTappedAround()
+        self.viewUpByKeyboard()
         //mapbox
         map = MGLMapView(frame: self.MapView.bounds,
                                  styleURL: MGLStyle.lightStyleURL())
@@ -56,26 +62,60 @@ class WriteViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     @IBAction func WriteAction(sender: AnyObject) {
+        UIView.animateWithDuration(1, animations: {self.progressBar.alpha = 1}, completion: nil)
         let latitude:Double = Double((self.map?.userLocation?.coordinate.latitude)!)
         let longitude:Double = Double((self.map?.userLocation?.coordinate.longitude)!)
-        
         let point = PFGeoPoint(latitude: latitude, longitude: longitude)
         let articleObject = PFObject(className: "article")
         articleObject["content"] = self.textView.text
         articleObject["user"] = PFUser.currentUser()
         articleObject["location"] = point
+        articleObject["category"] = self.category
+        articleObject["voteCount"] = 0
+        articleObject["commentCount"] = 0
+        //이미지 세팅
         
-        articleObject.saveInBackgroundWithBlock{
-            (success: Bool, error: NSError?) -> Void in
-            if(success){
-                self.dismissViewControllerAnimated(true, completion: nil)
-            }
-            else{
-                print(error)
+        if let userImage = self.userSelectImage.image{
+            let imageData = UIImageJPEGRepresentation(userImage, 0.1)
+            if let imageFile = PFFile(name:"image.jpg", data:imageData!){
+                //이미지 업로드
+                imageFile.saveInBackgroundWithBlock({
+                    (succeeded: Bool, error: NSError?) -> Void in
+                    if succeeded == true{
+                        articleObject["image"] = imageFile
+                        articleObject.saveInBackgroundWithBlock{
+                            (success: Bool, error: NSError?) -> Void in
+                            if(success){
+                                self.dismissViewControllerAnimated(true, completion: nil)
+                            }
+                            else{
+                                print(error)
+                            }
+                        }
+                        
+                    }
+                    else
+                    {
+                        print("이미지 업로드 실패: \(error)") // 이미지 업로드 실패
+                    }
+                    }, progressBlock: { //프로세스 블럭 체크
+                        (percentDone: Int32) -> Void in
+                        self.progressBar.setProgress(Float(percentDone) / 100, animated: true)
+                        print(percentDone)
+                })
             }
         }
-        
-        
+        else{
+            articleObject.saveInBackgroundWithBlock{
+                (success: Bool, error: NSError?) -> Void in
+                if(success){
+                    self.dismissViewControllerAnimated(true, completion: nil)
+                }
+                else{
+                    print(error)
+                }
+            }
+        }
         print(self.map!.userLocation?.coordinate)
     }
     
@@ -83,10 +123,29 @@ class WriteViewController: UIViewController {
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
+    func wrapperDidPress(images: [UIImage]) {
+        
+    }
+    
+    func doneButtonDidPress(images: [UIImage]) {
+        print("done")
+        self.userSelectImages = images
+        self.userSelectImage.image = images[0]
+        self.dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func cancelButtonDidPress() {
+        
+    }
+    @IBAction func ImageSelectAction(sender: AnyObject) {
+        let imagePickerController = ImagePickerController()
+        imagePickerController.delegate = self
+        imagePickerController.imageLimit = 1
+        Configuration.noImagesTitle = "Sorry! There are no images here!"
+        self.presentViewController(imagePickerController, animated: true, completion: nil)
+    }
+    
     func endEditting(sender:UITapGestureRecognizer){
-        
-        
-        
         print("endEditting")
         self.view.endEditing(true)
         // do other task

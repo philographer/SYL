@@ -9,7 +9,9 @@
 import UIKit
 import Parse
 import Mapbox
-
+import SwiftyJSON
+import Toucan
+import Kingfisher
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, KCFloatingActionButtonDelegate {
     
@@ -26,11 +28,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     @IBOutlet var floatBtnConstraintBottom: NSLayoutConstraint!
     
     //KFloat Button
-    let kCloseCellHeight: CGFloat = 179
-    let kOpenCellHeight: CGFloat = 488
-    let kRowsCount = 1
+    let kCloseCellHeight: CGFloat = 205
+    let kOpenCellHeight: CGFloat = 479
     var cellHeights = [CGFloat]()
     var map:MGLMapView?
+    var article:[PFObject]!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,27 +47,27 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         map!.attributionButton.hidden = true
         self.MapView.addSubview(map!)
         //Collapsible Table
-        createCellHeightsArray()
+
         self.tableView.backgroundColor = UIColor(patternImage: UIImage(named: "background")!)
-        tableView.dataSource = self
-        tableView.delegate = self
+        
+        
         
         //KFloat Button Add Item
         self.floatBtn.openAnimationType = KCFABOpenAnimationType.SlideDown
         self.floatBtn.addItem("기타", icon: UIImage(named: "icMap")!, handler: {item in
-            self.performSegueWithIdentifier("writeViewController", sender: self)
+            self.performSegueWithIdentifier("writeViewController", sender: 1)
             print("기타")})
         self.floatBtn.addItem("범죄", icon: UIImage(named: "icShare")!, handler: {item in
-            self.performSegueWithIdentifier("writeViewController", sender: self)
+            self.performSegueWithIdentifier("writeViewController", sender: 2)
             print("범죄")})
         self.floatBtn.addItem("사고", icon: UIImage(named: "icMap")!, handler: {item in
-            self.performSegueWithIdentifier("writeViewController", sender: self)
+            self.performSegueWithIdentifier("writeViewController", sender: 3)
             print("사고")})
         self.floatBtn.addItem("물자", icon: UIImage(named: "icMap")!, handler: {item in
-            self.performSegueWithIdentifier("writeViewController", sender: self)
+            self.performSegueWithIdentifier("writeViewController", sender: 4)
             print("물자")})
         self.floatBtn.addItem("의료", icon: UIImage(named: "icMap")!, handler: {item in
-            self.performSegueWithIdentifier("writeViewController", sender: self)
+            self.performSegueWithIdentifier("writeViewController", sender: 5)
             print("의료")})
         
         //print(PFUser.currentUser()!["name"])
@@ -77,12 +79,31 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         print(PFUser.currentUser())
         //회원가입 안 했으면 메인으로
         if(PFUser.currentUser() == nil){
-            self.performSegueWithIdentifier("FromMainToSign", sender: self)
+            print("가입하지 않은 유져")
+            dispatch_async(dispatch_get_main_queue()){
+                [unowned self] in
+                    self.performSegueWithIdentifier("FromMainToSign", sender: self)
+            }
             print("노아이디")
         }
         else{
             map!.userTrackingMode = MGLUserTrackingMode.FollowWithHeading
-            print(map!.userLocation?.coordinate)
+            let query = PFQuery(className: "article")
+            query.orderByDescending("createdAt")
+            query.findObjectsInBackgroundWithBlock{
+                (objects: [PFObject]?, error: NSError?) -> Void in
+                if let error = error{
+                    print("Article 가져오기 오류\(error)")
+                }
+                else{
+                    self.article = objects!
+                    self.createCellHeightsArray()
+                    self.tableView.dataSource = self
+                    self.tableView.delegate = self
+                    self.tableView.reloadData()
+                }
+            }
+            //카메라 시점
             //let camera = MGLMapCamera(lookingAtCenterCoordinate: (map!.userLocation?.coordinate)!, fromDistance: 9000, pitch: 45, heading: 0)
             //map!.setCamera(camera, withDuration: 3, animationTimingFunction: CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut))
         }
@@ -92,6 +113,28 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         print(map!.userLocation?.coordinate)
     }
     
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "writeViewController"{
+            let senderInt = sender as! Int
+            let destController = segue.destinationViewController as! WriteViewController
+            switch senderInt {
+            case 1:
+                destController.category = "기타"
+            case 2:
+                destController.category = "범죄"
+            case 3:
+                destController.category = "사고"
+            case 4:
+                destController.category = "물자"
+            case 5:
+                destController.category = "의료"
+            default:
+                break
+            }
+            print(senderInt)
+            
+        }
+    }
     
     
     
@@ -103,15 +146,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     // MARK: configure
     func createCellHeightsArray() {
-        for _ in 0...kRowsCount {
+        for _ in 0...self.article.count {
             cellHeights.append(kCloseCellHeight)
+            print("add cell")
         }
     }
     
     // MARK: - Table view data source
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        return self.article.count
     }
     
     func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
@@ -129,8 +173,33 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("FoldingCell", forIndexPath: indexPath)
+        let cell = tableView.dequeueReusableCellWithIdentifier("ArticleCell", forIndexPath: indexPath) as! ArticleCell
+        //cell.foregroundName.text = article[indexPath.row]["user"]["name"] as String
+        //print(article[indexPath.row]["user"])
+        cell.foregroundContent.text = article[indexPath.row]["content"] as! String
+        cell.containerContent.text = article[indexPath.row]["content"] as! String
+        cell.voteCount.text = String(article[indexPath.row]["voteCount"] as! Int)
+        cell.commentCount.text = String(article[indexPath.row]["commentCount"] as! Int)
+        //cell.foregroundTime.text = String(article[indexPath.row]["created_at"] as! NSDate)
+        //cell.foregroundAddress.text = String(article[indexPath.row]["location"] as! PFGeoPoint)
         
+        //유져정보 가져옴
+        let nowUser = article[indexPath.row]["user"] as! PFObject
+        nowUser.fetchIfNeededInBackgroundWithBlock {
+            (user: PFObject?, error: NSError?) -> Void in
+            cell.foregroundName.text = user?["name"] as? String
+            cell.containerName.text = user?["name"] as? String
+            if let nowPhoto = user?["userPhoto"]{
+                let unwrapPhoto = nowPhoto as! PFFile
+                cell.foregroundImage.kf_setImageWithURL(NSURL(string: unwrapPhoto.url!)!)
+                cell.containerImage.kf_setImageWithURL(NSURL(string: unwrapPhoto.url!)!)
+            }
+        }
+        
+        //이미지 정보 가져옴
+        if let contentPhoto = self.article[indexPath.row]["image"] as? PFFile{
+            cell.contentImage.kf_setImageWithURL(NSURL(string: contentPhoto.url!)!)
+        }
         return cell
     }
     

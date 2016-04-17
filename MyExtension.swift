@@ -28,4 +28,18 @@ extension UIViewController {
     func dismissKeyboard() {
         view.endEditing(true)
     }
+    
+    func viewUpByKeyboard(){
+            print("workd")
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.keyBoardWiilUo(_:)), name:UIKeyboardWillShowNotification, object: nil);
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.keyboardWillDown(_:)), name:UIKeyboardWillHideNotification, object: nil);
+            // Do any additional setup after loading the view.
+    }
+    
+    func keyBoardWiilUo(sender: NSNotification) {
+        self.view.frame.origin.y -= 200
+    }
+    func keyboardWillDown(sender: NSNotification) {
+        self.view.frame.origin.y += 200
+    }
 }

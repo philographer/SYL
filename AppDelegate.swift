@@ -39,7 +39,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return urls[urls.endIndex - 1]
         }()
         let logPath: NSURL = cacheDirectory.URLByAppendingPathComponent("app.log")
-        log.setup(.Debug, showThreadName: true, showLogLevel: true, showFileNames: true, showLineNumbers: true, writeToFile: logPath, fileLogLevel: .Debug)
+        log.setup(.Debug, showThreadName: false, showLogLevel: false, showFileNames: false, showLineNumbers: true, writeToFile: logPath, fileLogLevel: .Debug)
         //log.setup(.Debug, showThreadName: true, showLogLevel: true, showFileNames: true, showLineNumbers: true, writeToFile: "path/to/file", fileLogLevel: .Debug)
         
         
