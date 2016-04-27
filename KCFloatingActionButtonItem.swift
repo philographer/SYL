@@ -65,7 +65,7 @@ public class KCFloatingActionButtonItem: UIView {
         get {
             if _titleLabel == nil {
                 _titleLabel = UILabel()
-                _titleLabel?.textColor = UIColor.whiteColor()
+                _titleLabel?.textColor = UIColor(red: 31/255, green: 223/255, blue: 223/255, alpha: 1)
                 addSubview(_titleLabel!)
             }
             return _titleLabel!
@@ -91,7 +91,8 @@ public class KCFloatingActionButtonItem: UIView {
     public var iconImageView: UIImageView {
         get {
             if _iconImageView == nil {
-                _iconImageView = UIImageView(frame: CGRectMake(0, 0, 21, 23))
+                _iconImageView = UIImageView(frame: CGRectMake(0, 0, 42, 42))
+                
                 //                _iconImageView = UIImageView(frame: CGRectMake(frame.size.width - size, 0, 21, 23))
                 _iconImageView?.center = CGPointMake(size/2, size/2) + imageOffset
                 _iconImageView?.contentMode = UIViewContentMode.ScaleToFill
@@ -132,6 +133,7 @@ public class KCFloatingActionButtonItem: UIView {
         super.drawRect(rect)
         
         self.layer.shouldRasterize = true
+        self.layer.zPosition = 10
         self.layer.rasterizationScale = UIScreen.mainScreen().scale
         createCircleLayer()
         setShadow()
