@@ -11,7 +11,7 @@ import Parse
 import Mapbox
 import SwiftDate
 
-class DetailViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class DetailViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UITextViewDelegate {
     
     @IBOutlet var nameOfArticle: UILabel!
     @IBOutlet var tableView: UITableView!
@@ -29,6 +29,9 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.tableFooterView = UIView()
         
         
+        let indexPath = NSIndexPath(forItem: 0, inSection: 0)
+        let firstCell = self.tableView.cellForRowAtIndexPath(indexPath) as! DetailFirstCell
+        firstCell.textView.delegate = self
     }
     
     override func didReceiveMemoryWarning() {
@@ -81,7 +84,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
                     cell.userImage.kf_setImageWithURL(NSURL(string: unwrapPhoto.url!)!)
                 }
                 else{
-                    cell.userImage.image = UIImage(named: "default-user")
+                    cell.userImage.image = UIImage(named: "default-user2")
                 }
                 if let userName = user?["nickname"]{
                     cell.userName.text = userName as? String
@@ -103,9 +106,9 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
             dateFormatter.dateFormat = "yyyy-MM-dd"
             let writeDate = dateFormatter.stringFromDate(article.createdAt!)
             */
+        
             
             let stringDate = (article.createdAt!).toNaturalString(NSDate(), inRegion: .None, style: FormatterStyle(style: .Abbreviated, max: 1))!
-            
             cell.textView.text = article["content"] as! String
             cell.shareCount.text = String(article["shareCount"] as! Int)
             cell.commentCount.text = String(article["commentCount"] as! Int)
@@ -123,6 +126,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
             cell.mapView.setCenterCoordinate(center, zoomLevel: 12, animated: false)
             cell.mapView.attributionButton.hidden = true
             cell.mapView.styleURL = MGLStyle.lightStyleURL()
+            //cell.selectionStyle = .None
             
             
             /*
@@ -157,8 +161,9 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
                     
                 }
                 else{
-                    cell.userImage.image = UIImage(named: "default-uesr")
-                    print("이미지가 없어 ㅡㅡ")
+                    //cell.userImage.image = UIImage(named: "default-uesr")
+                    cell.userImage.image = UIImage(named: "default-user2")
+                    print("글쓴이 이미자가 없어서 넣어줬음")
                 }
                 if let userName = user?["nickname"]{
                     cell.userName.text = userName as? String
@@ -166,6 +171,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
                 }
             }
             //print("메인부분 불려짐")
+            cell.selectionStyle = .None
             return cell
         }
     }

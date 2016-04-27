@@ -22,23 +22,27 @@ class DetailFirstCell: UITableViewCell {
     @IBOutlet var imageConstraint: NSLayoutConstraint!
     @IBOutlet var collapseBtnConstraint: NSLayoutConstraint!
     @IBOutlet var imageTopConstraint: NSLayoutConstraint!
+    @IBOutlet var mapHeightConstraint: NSLayoutConstraint!
     
     
     @IBAction func collapseAction(sender: AnyObject) {
+        print("버튼 클릭")
         
-        if self.collapseBtnConstraint.constant != 70{
+        if self.collapseBtnConstraint.constant == 238{
             UIView.animateWithDuration(0.3, delay: 0, options: .CurveEaseIn, animations: {
                 self.mapView.alpha = 0
-                self.collapseBtnConstraint.constant = 70
-                self.imageTopConstraint.constant = 50
+                //self.mapHeightConstraint.active = false
+                self.mapHeightConstraint.constant = 1
                 
                 //부모테이블
+                /*
                 let superTableView = self.superview?.superview as! UITableView
                 //섹션
                 var section = NSIndexSet(index: 2)
                 //superTableView.reloadSections(section, withRowAnimation: .Automatic)
                 section = NSIndexSet(index: 1)
                 superTableView.reloadSections(section, withRowAnimation: .None)
+                */
                 self.layoutIfNeeded()
                 }, completion: {
                     finished in print("지도 접기")

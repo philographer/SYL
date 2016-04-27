@@ -256,7 +256,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     @IBAction func collapseAction(sender: AnyObject) {
         
         //열려있으면 접기
-        if(collapsibleConstraint.constant == 217)
+        if(collapsibleConstraint.constant == 215)
         {
             
             UIView.animateWithDuration(0.3, delay: 0, options: .CurveEaseIn, animations: {
@@ -267,10 +267,15 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 self.MapView.alpha = 1
                 self.collapsibleConstraint.constant = 0
                 self.collapseBtnConstraint.constant = 68 //탑과 버튼사이
-                self.collapseBtn.transform = CGAffineTransformMakeRotation(CGFloat(M_PI))
+                self.collapseBtn.hidden = true
+                //self.collapseBtn.transform = CGAffineTransformMakeRotation(CGFloat(M_PI))
                 self.view.layoutIfNeeded()}, completion: {
                     finished in print("지도 접기")
                     self.floatBtn.openAnimationType = KCFABOpenAnimationType.SlideUp
+                    UIView.animateWithDuration(0.1, delay: 0, options: .CurveEaseIn, animations: {
+                        self.collapseBtn.hidden = false
+                        self.collapseBtn.setImage(UIImage(named: "down"), forState: .Normal)
+                    }, completion:  nil)
             })
             
         }
@@ -282,12 +287,18 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 self.myLocationBtnConstraint.constant = 40
                 self.myLocationBtn.alpha = 1
                 self.MapView.alpha = 1
-                self.collapsibleConstraint.constant = 217
+                self.collapsibleConstraint.constant = 215
+                self.collapseBtn.hidden = true
                 self.collapseBtnConstraint.constant = 259
-                self.collapseBtn.transform = CGAffineTransformMakeRotation(CGFloat(M_PI*2))
+                //self.collapseBtn.transform = CGAffineTransformMakeRotation(CGFloat(M_PI*2))
+                
                 self.view.layoutIfNeeded()}, completion: {
                     finished in print("지도 펴기")
                     self.floatBtn.openAnimationType = KCFABOpenAnimationType.SlideDown
+                    UIView.animateWithDuration(0.1, delay: 0, options: .CurveEaseIn, animations: {
+                        self.collapseBtn.hidden = false
+                        self.collapseBtn.setImage(UIImage(named: "up"), forState: .Normal)
+                        }, completion:  nil)
                     //self.view.removeConstraint(floatBtnConstraint)
             })
         }
