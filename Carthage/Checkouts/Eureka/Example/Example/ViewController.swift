@@ -1,7 +1,7 @@
 //  ViewController.swift
 //  Eureka ( https://github.com/xmartlabs/Eureka )
 //
-//  Copyright (c) 2015 Xmartlabs ( http://xmartlabs.com )
+//  Copyright (c) 2016 Xmartlabs ( http://xmartlabs.com )
 //
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -38,9 +38,9 @@ class HomeViewController : FormViewController {
            cell.accessoryView?.frame = CGRectMake(0, 0, 34, 34)
         }
         
-        form  +++=
+        form =
             
-            Section(footer: "These are 10 ButtonRow rows") {
+            Section() {
                 $0.header = HeaderFooterView<EurekaLogoView>(HeaderFooterProvider.Class)
             }
         
@@ -92,9 +92,24 @@ class HomeViewController : FormViewController {
                     row.title = row.tag
                     row.presentationMode = .SegueName(segueName: "ListSectionsControllerSegue", completionCallback: nil)
                 }
+        +++ Section()
+                <<< ButtonRow() { (row: ButtonRow) -> Void in
+                   row.title = "About"
+                }  .onCellSelection({ (cell, row) in
+                    self.showAlert()
+                })
     }
+    
+    
+    @IBAction func showAlert() {
+        let alertController = UIAlertController(title: "OnCellSelection", message: "Button Row Action", preferredStyle: .Alert)
+        let defaultAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
+        alertController.addAction(defaultAction)
+        presentViewController(alertController, animated: true, completion: nil)
+        
+    }
+    
 }
-
 //MARK: Emoji
 
 typealias Emoji = String
@@ -120,7 +135,11 @@ class RowsExampleViewController: FormViewController {
                         $0.title = "LabelRow"
                         $0.value = "tap the row"
                     }
-                    .onCellSelection { $0.cell.detailTextLabel?.text? += " 🇺🇾 " }
+                    .onCellSelection { cell, row in
+                        row.title = (row.title ?? "") + " 🇺🇾 "
+                        row.reload() // or row.updateCell()
+                    }
+            
             
                 <<< DateRow() { $0.value = NSDate(); $0.title = "DateRow" }
                 
@@ -337,7 +356,7 @@ class CustomCellsController : FormViewController {
         form +++
             Section() {
                 var header = HeaderFooterView<EurekaLogoViewNib>(HeaderFooterProvider.NibFile(name: "EurekaSectionHeader", bundle: nil))
-                header.onSetupView = { (view, section, form) -> () in
+                header.onSetupView = { (view, section) -> () in
                                             view.imageView.alpha = 0;
                                             UIView.animateWithDuration(2.0, animations: { [weak view] in
                                                 view?.imageView.alpha = 1
@@ -434,7 +453,10 @@ class FieldRowCustomizationController : FormViewController {
         
             +++ Section("TextAreaRow")
         
-                <<< TextAreaRow() { $0.placeholder = "TextAreaRow" }
+                <<< TextAreaRow() {
+                    $0.placeholder = "TextAreaRow"
+                    $0.textAreaHeight = .Dynamic(initialTextViewHeight: 110)
+                }
         
             }
 }
@@ -689,6 +711,7 @@ class NativeEventFormViewController : FormViewController {
         
             <<< TextAreaRow("notes") {
                     $0.placeholder = "Notes"
+                    $0.textAreaHeight = .Dynamic(initialTextViewHeight: 50)
                 }
         
     }
@@ -1006,16 +1029,10 @@ class InlineRowsController: FormViewController {
         +++ Section("Generic inline picker")
             
             <<< PickerInlineRow<NSDate>("PickerInlineRow") { (row : PickerInlineRow<NSDate>) -> Void in
-            
                     row.title = row.tag
-                    row.displayValueFor = {
-                        guard let date = $0 else{
-                            return nil
-                        }
-                        let year = NSCalendar.currentCalendar().component(.Year, fromDate: date)
-                        return "Year \(year)"
+                    row.displayValueFor = { (rowValue: NSDate?) in
+                        return rowValue.map { "Year \(NSCalendar.currentCalendar().component(.Year, fromDate: $0))" }
                     }
-                
                     row.options = []
                     var date = NSDate()
                     for _ in 1...10{

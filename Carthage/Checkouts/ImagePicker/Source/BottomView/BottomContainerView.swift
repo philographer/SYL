@@ -9,7 +9,11 @@ protocol BottomContainerViewDelegate: class {
 }
 
 public class BottomContainerView: UIView {
-
+  
+  struct Dimensions {
+    static let height: CGFloat = 101
+  }
+  
   lazy var pickerButton: ButtonPicker = { [unowned self] in
     let pickerButton = ButtonPicker()
     pickerButton.setTitleColor(.whiteColor(), forState: .Normal)
@@ -32,16 +36,13 @@ public class BottomContainerView: UIView {
     let button = UIButton()
     button.setTitle(Configuration.cancelButtonTitle, forState: .Normal)
     button.titleLabel?.font = Configuration.doneButton
-    button.addTarget(self, action: "doneButtonDidPress:", forControlEvents: .TouchUpInside)
+    button.addTarget(self, action: #selector(doneButtonDidPress(_:)), forControlEvents: .TouchUpInside)
 
     return button
     }()
 
-  lazy var stackView: ImageStackView = {
-    let view = ImageStackView(frame: CGRect(x: 0, y: 0, width: 80, height: 80))
-    return view
-    }()
-
+  lazy var stackView = ImageStackView(frame: CGRect(x: 0, y: 0, width: 80, height: 80))
+    
   lazy var topSeparator: UIView = { [unowned self] in
     let view = UIView()
     view.backgroundColor = Configuration.backgroundColor
@@ -51,7 +52,7 @@ public class BottomContainerView: UIView {
 
   lazy var tapGestureRecognizer: UITapGestureRecognizer = { [unowned self] in
     let gesture = UITapGestureRecognizer()
-    gesture.addTarget(self, action: "handleTapGestureRecognizer:")
+    gesture.addTarget(self, action: #selector(handleTapGestureRecognizer(_:)))
 
     return gesture
     }()

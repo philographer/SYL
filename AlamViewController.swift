@@ -13,6 +13,8 @@ import SwiftDate
 class AlamViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     var alarms:[PFObject]! = []
+    var myName:String?
+    
 
     @IBOutlet var tableView: UITableView!
     override func viewDidLoad() {
@@ -74,6 +76,8 @@ class AlamViewController: UIViewController, UITableViewDelegate, UITableViewData
             if let nowPhoto = user?["userPhoto"]{
                 let unwrapPhoto = nowPhoto as! PFFile
                 cell.userPhoto.kf_setImageWithURL(NSURL(string: unwrapPhoto.url!)!)
+            }else{
+                cell.userPhoto.image = UIImage(named: "default-user2")
             }
             if let userName = user?["nickname"]{
                 let fromName = userName as! String
@@ -123,12 +127,32 @@ class AlamViewController: UIViewController, UITableViewDelegate, UITableViewData
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "FromAlarmToDetail"{
             let destController = segue.destinationViewController as! DetailViewController
+            
             destController.article = sender as! PFObject
+            destController.category = String(destController.article["category"])
+            destController.myName = self.myName
             
-            print(destController.article)
+            destController.name = String(destController.article["authorNick"])
+            destController.nameArticle = String(destController.article["authorNick"]) + "님의 글"
+            
+            let query = PFQuery(className: "comment")
+            query.whereKey("article", equalTo: destController.article)
+            query.orderByAscending("createdAt")
+            query.findObjectsInBackgroundWithBlock{
+                (objects: [PFObject]?, error: NSError?) -> Void in
+                if let error = error{
+                    SCLAlertView().showError("Comment Error", subTitle: "코멘트 가져오기 에러 \(error)")
+                }
+                else{
+                    destController.comments = objects!
+                    let section = NSIndexSet(index: 2)
+                    destController.tableView.reloadSections(section, withRowAnimation: .Automatic)
+                }
+            }
             
             
-            
+            //임시
+            //destController.category = "other"
             
             //새로 받아야
             //print(self.alarms[sender!.row])

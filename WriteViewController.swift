@@ -13,7 +13,7 @@ import ImagePicker
 import Alamofire
 import SwiftyJSON
 
-class WriteViewController: UIViewController, ImagePickerDelegate {
+class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDelegate {
 
     @IBOutlet var MapView: UIView!
     @IBOutlet var writeButton: UIButton!
@@ -28,6 +28,7 @@ class WriteViewController: UIViewController, ImagePickerDelegate {
     var map:MGLMapView?
     var category:String!
     var userSelectImages: [UIImage]?
+    var placeholderLabel : UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -99,11 +100,13 @@ class WriteViewController: UIViewController, ImagePickerDelegate {
                     response in
                     print(response)
                     switch response.result {
-                    case .Success:
+                    case .Success: break
+                        /*
                         if let value = response.result.value {
-                            let json = JSON(value)
+                            //let json = JSON(value)
                             //self.nowLocationLabel.text = json["fullName"].stringValue
                         }
+                        */
                     case .Failure(let error):
                         alertView.showError("주소 찾기 에러", subTitle: "현재 주소를 찾을 수 없습니다.\(error) GPS설정을 확인해 주세요")
                     }
@@ -115,6 +118,20 @@ class WriteViewController: UIViewController, ImagePickerDelegate {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(UIViewController.keyboardWillHide(_:)), name: UIKeyboardWillHideNotification, object: nil)
         
         print("category \(category)")
+        
+        
+        self.textView.delegate = self
+        placeholderLabel = UILabel()
+        placeholderLabel.text = "여기를 눌러 글을 작성하세요"
+        placeholderLabel.font = UIFont.italicSystemFontOfSize(self.textView.font!.pointSize)
+        placeholderLabel.sizeToFit()
+        self.textView.addSubview(placeholderLabel)
+        placeholderLabel.frame.origin = CGPointMake(5, self.textView.font!.pointSize / 2)
+        placeholderLabel.textColor = UIColor(white: 1, alpha: 0.3)
+        placeholderLabel.hidden = !self.textView.text.isEmpty
+        
+        
+        
         
     }
 
@@ -138,6 +155,7 @@ class WriteViewController: UIViewController, ImagePickerDelegate {
                 let longitude:Double = userRealLocation.coordinate.longitude
                 var locationString:String! = ""
                 let articleObject = PFObject(className: "article")
+                let postPhotoObject = PFObject(className: "PostPhoto")
                 
                 //유져 닉네임 꺼내오기
                 let thisUser = PFUser.currentUser()!
@@ -161,7 +179,7 @@ class WriteViewController: UIViewController, ImagePickerDelegate {
                             case .Success:
                                 if let value = response.result.value {
                                     let json = JSON(value)
-                                    print("JSON: \(json)")
+                                    print("JSON: \(json["SUCCESS"])")
                                     locationString = json["fullName"].stringValue
                                     articleObject["locationString"] = locationString
                                     if let userImage = self.userSelectImage.image{
@@ -172,16 +190,25 @@ class WriteViewController: UIViewController, ImagePickerDelegate {
                                                 (succeeded: Bool, error: NSError?) -> Void in
                                                 if succeeded == true{
                                                     articleObject["image"] = imageFile
+                                                    postPhotoObject["photoFile"] = imageFile
+                                                    
+                                                    let nowData = NSDate().toString()!
+                                                    articleObject["photoKey"] = nowData
+                                                    postPhotoObject["key"] = nowData
+                                                    
                                                     articleObject["numOfPhotos"] = 1
                                                     articleObject.saveInBackgroundWithBlock{
                                                         (success: Bool, error: NSError?) -> Void in
                                                         if(success){
+                                                            postPhotoObject.saveInBackground()
                                                             self.dismissViewControllerAnimated(true, completion: nil)
                                                         }
                                                         else{
                                                             alertView.showError("게시글 업로드 에러", subTitle: "\(error!)")
                                                         }
                                                     }
+                                                    
+                                                    
                                                     
                                                 }
                                                 else
@@ -288,6 +315,10 @@ class WriteViewController: UIViewController, ImagePickerDelegate {
             })
             self.view.tag = 0
         }
+    }
+    
+    func textViewDidChange(textView: UITextView) {
+        self.placeholderLabel.hidden = !textView.text.isEmpty
     }
     /*
     // MARK: - Navigation

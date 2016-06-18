@@ -123,7 +123,7 @@ extension ImagePickerController {
 
     view.addConstraint(NSLayoutConstraint(item: bottomContainer, attribute: .Height,
       relatedBy: .Equal, toItem: nil, attribute: .NotAnAttribute,
-      multiplier: 1, constant: Dimensions.bottomContainerHeight))
+      multiplier: 1, constant: BottomContainerView.Dimensions.height))
 
     view.addConstraint(NSLayoutConstraint(item: topView, attribute: .Height,
       relatedBy: .Equal, toItem: nil, attribute: .NotAnAttribute,
@@ -131,7 +131,7 @@ extension ImagePickerController {
 
     view.addConstraint(NSLayoutConstraint(item: cameraController.view, attribute: .Height,
       relatedBy: .Equal, toItem: view, attribute: .Height,
-      multiplier: 1, constant: -Dimensions.bottomContainerHeight))
+      multiplier: 1, constant: -BottomContainerView.Dimensions.height))
   }
 }
 
@@ -145,6 +145,19 @@ extension ImageGalleryViewCell {
         multiplier: 1, constant: 0))
 
       addConstraint(NSLayoutConstraint(item: selectedImageView, attribute: attribute,
+        relatedBy: .Equal, toItem: self, attribute: attribute,
+        multiplier: 1, constant: 0))
+    }
+  }
+}
+
+extension ButtonPicker {
+
+  func setupConstraints() {
+    let attributes: [NSLayoutAttribute] = [.CenterX, .CenterY]
+    
+    for attribute in attributes {
+      addConstraint(NSLayoutConstraint(item: numberLabel, attribute: attribute,
         relatedBy: .Equal, toItem: self, attribute: attribute,
         multiplier: 1, constant: 0))
     }

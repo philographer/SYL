@@ -9,4 +9,4 @@ github "vikmeup/SCLAlertView-Swift"
 github "gavinbunney/Toucan"
 github "onevcat/Kingfisher" ~> 2.2
 github "malcommac/SwiftDate"
-github "raulriera/TextFieldEffects" ~> 1.1.1
+

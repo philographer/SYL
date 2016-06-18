@@ -26,7 +26,7 @@ public enum SCLAlertViewStyle {
         case Info:
             return 0x2866BF
         case Edit:
-            return 0xA429FF
+            return 0x1FDFDF
         case Wait:
             return 0xD62DA5
         }

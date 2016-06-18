@@ -124,12 +124,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 29D699F81B70ABFC0021FA73 /* Build configuration list for PBXNativeTarget "ImagePickerDemo" */;
 			buildPhases = (
-				CFC24DB54992EE46F3A63C6F /* Check Pods Manifest.lock */,
+				CFC24DB54992EE46F3A63C6F /* 📦 Check Pods Manifest.lock */,
 				29D699D51B70ABFC0021FA73 /* Sources */,
 				29D699D61B70ABFC0021FA73 /* Frameworks */,
 				29D699D71B70ABFC0021FA73 /* Resources */,
-				A0BD0958A43D0416D3FF9365 /* Embed Pods Frameworks */,
-				6821C4AC157C46704C0307CA /* Copy Pods Resources */,
+				A0BD0958A43D0416D3FF9365 /* 📦 Embed Pods Frameworks */,
+				6821C4AC157C46704C0307CA /* 📦 Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -152,7 +152,7 @@
 				TargetAttributes = {
 					29D699D81B70ABFC0021FA73 = {
 						CreatedOnToolsVersion = 6.4;
-						DevelopmentTeam = XVAH95CHDC;
+						DevelopmentTeam = LG4DBY4QF9;
 					};
 				};
 			};
@@ -188,14 +188,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		6821C4AC157C46704C0307CA /* Copy Pods Resources */ = {
+		6821C4AC157C46704C0307CA /* 📦 Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Copy Pods Resources";
+			name = "📦 Copy Pods Resources";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -203,14 +203,14 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ImagePickerDemo/Pods-ImagePickerDemo-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		A0BD0958A43D0416D3FF9365 /* Embed Pods Frameworks */ = {
+		A0BD0958A43D0416D3FF9365 /* 📦 Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Embed Pods Frameworks";
+			name = "📦 Embed Pods Frameworks";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -218,14 +218,14 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ImagePickerDemo/Pods-ImagePickerDemo-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		CFC24DB54992EE46F3A63C6F /* Check Pods Manifest.lock */ = {
+		CFC24DB54992EE46F3A63C6F /* 📦 Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Check Pods Manifest.lock";
+			name = "📦 Check Pods Manifest.lock";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -347,11 +347,11 @@
 			baseConfigurationReference = C4392341AC7391C01AD9F350 /* Pods-ImagePickerDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = ImagePickerDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = no.ImagePicker.hyper;
+				PRODUCT_BUNDLE_IDENTIFIER = no.hyper.ImagePickerDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -361,11 +361,11 @@
 			baseConfigurationReference = 6F9E1FF802198DC16F260795 /* Pods-ImagePickerDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = ImagePickerDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = no.ImagePicker.hyper;
+				PRODUCT_BUNDLE_IDENTIFIER = no.hyper.ImagePickerDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

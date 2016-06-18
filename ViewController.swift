@@ -41,33 +41,31 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     @IBOutlet weak var collapseBtnConstraint: NSLayoutConstraint!
     @IBOutlet var floatBtnConstraint: NSLayoutConstraint!
     @IBOutlet var floatBtnConstraintBottom: NSLayoutConstraint!
+    @IBOutlet weak var activityIndc: UIActivityIndicatorView!
     
-    //KFloat Button
-    let kCloseCellHeight: CGFloat = 205
-    let kOpenCellHeight: CGFloat = 479
+    //KFloat Button 맵, 아티클, 뱃지, 마커
     var map:MGLMapView!
     var article:[PFObject]!
     var badgeNum:Int!
     var markers:[MGLPointAnnotation] = []
+    var myName:String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         //테이블 뷰 예상높이, 동적 디멘션
         tableView.estimatedRowHeight = 238
         tableView.rowHeight = UITableViewAutomaticDimension
+        //테이블뷰 배경색
         self.tableView.backgroundColor = UIColor(red: 44/255, green: 43/255, blue: 43/255, alpha: 1)
         
         //mapbox
         map = MGLMapView(frame: self.MapView.bounds,
                              styleURL: MGLStyle.lightStyleURL())
         map.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
-        //set the map's center coordinate
-        /*map!.setCenterCoordinate(CLLocationCoordinate2D(latitude: 40.7326808,
-            longitude: -73.9843407),zoomLevel: 12, animated: false)
-        */
         map.attributionButton.hidden = true
         self.MapView.addSubview(map)
         map.delegate = self
+        //self.myName = "아트나비"
         
         //KFloat Button Add Item
         self.floatBtn.openAnimationType = KCFABOpenAnimationType.SlideDown
@@ -89,6 +87,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         //글쓰기 버튼 이미지
         self.floatBtn.buttonImage = UIImage(named: "write_btn")
+        
+        
     }
     
     
@@ -102,12 +102,24 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 [unowned self] in
                     self.performSegueWithIdentifier("FromMainToSign", sender: self)
             }
-            print("노아이디")
         }
         else{ //회원가입 했으면 유져트래킹모드
             map!.userTrackingMode = MGLUserTrackingMode.FollowWithHeading
             //테이블뷰 갱신
+            self.activityIndc.hidden = false
+            self.activityIndc.startAnimating()
             self.reloadData()
+            let nowUser = PFUser.currentUser()! as PFUser
+            nowUser.fetchIfNeededInBackgroundWithBlock {
+                (user: PFObject?, error: NSError?) -> Void in
+                print(user)
+                if let nickname = user?["nickname"]{
+                    self.myName = nickname as? String
+                    print("내이름\(self.myName)")
+                }else{
+                    print("아이디 가져오기 에러error")
+                }
+            }
         }
     }
     
@@ -141,9 +153,21 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         if segue.identifier == "FromMainToDetail"{ //메인 -> 디테일 segue
             let destController = segue.destinationViewController as! DetailViewController
             destController.article = self.article[sender!.row]
+            //print(self.article[sender!.row]["authorNick"])
+            
+            
+            destController.nameArticle = (self.article[sender!.row]["authorNick"] as? String)! + "님의 글"
+            destController.name = self.article[sender!.row]["authorNick"] as? String
+            
+            destController.myName = self.myName
+            
+            
+ 
+            
+
             let query = PFQuery(className: "comment")
             query.whereKey("article", equalTo: self.article[sender!.row])
-            query.orderByDescending("createdAt")
+            query.orderByAscending("createdAt")
             query.findObjectsInBackgroundWithBlock{
                 (objects: [PFObject]?, error: NSError?) -> Void in
                 if let error = error{
@@ -155,10 +179,12 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     destController.tableView.reloadSections(section, withRowAnimation: .Automatic)
                 }
             }
+            destController.category = self.article[sender!.row]["category"] as! String
         }
         
         if segue.identifier == "FromMainToAlarm"{ //메인 -> 알람 segue
             let destController = segue.destinationViewController as! AlamViewController
+            destController.myName = self.myName
             let query = PFQuery(className: "alarm")
             query.whereKey("toUser", equalTo: PFUser.currentUser()!)
             query.orderByDescending("createdAt")
@@ -168,12 +194,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     SCLAlertView().showError("Comment Error", subTitle: "알람 가져오기 에러 \(error)")
                 }
                 else{
-                    print("알람 가져왔다 \(objects)")
+                    //print("알람 가져왔다 \(objects)")
                     destController.alarms = objects!
+                    
                     let section = NSIndexSet(index: 0)
                     destController.tableView.reloadSections(section, withRowAnimation: .Automatic)
                 }
             }
+            
         }
     }
 
@@ -202,22 +230,34 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         //간단한 날짜(ex 1분전, 12시간전, 3일전)
         let stringDate = (article[indexPath.row].createdAt!).toNaturalString(NSDate(), inRegion: .None, style: FormatterStyle(style: .Abbreviated, max: 1))!
         
-        //유져 닉네임 꺼내오기
-        let thisUser = article[indexPath.row]["user"] as! PFUser
-        thisUser.fetchIfNeededInBackgroundWithBlock {
-            (user: PFObject?, error: NSError?) -> Void in
-            if let userName = user?["nickname"]{
-                cell.foregroundName.text = userName as? String
+        //실제 닉네임 꺼내오기
+        /*
+        dispatch_async(dispatch_get_main_queue(), {
+            let thisUser = self.article[indexPath.row]["user"] as! PFUser
+            thisUser.fetchIfNeededInBackgroundWithBlock {
+                (user: PFObject?, error: NSError?) -> Void in
+                if let userName = user?["nickname"]{
+                    cell.foregroundName.text = userName as? String
+                }
             }
-        }
-        
+            //cell.foregroundName.text = String(indexPath.row)
+        })
+        */
+        cell.foregroundName.text = article[indexPath.row]["authorNick"] as? String
         cell.backgroundColor = UIColor(red: 44/255, green: 43/255, blue: 43/255, alpha: 1)
         cell.foregroundContent.delegate = self
-        cell.foregroundContent.text = article[indexPath.row]["content"] as! String
+        
+        let style = NSMutableParagraphStyle()
+        style.lineSpacing = 10
+        let attributes = [NSParagraphStyleAttributeName : style]
+        let contentText:String = article[indexPath.row]["content"] as! String
+        cell.foregroundContent.attributedText = NSAttributedString(string: contentText, attributes:attributes)
+        cell.foregroundContent.textColor = UIColor.whiteColor()
+        cell.foregroundContent.font = UIFont(name: "HelveticaNeue", size: 17.0)
+        
         cell.shareCount.text = String(article[indexPath.row]["shareCount"] as! Int)
         cell.commentCount.text = String(article[indexPath.row]["commentCount"] as! Int)
-        cell.foregroundContent.text = article[indexPath.row]["content"] as! String
-        cell.foregroundContent.textColor = UIColor.whiteColor()
+        
         cell.foregroundTime.text = String(stringDate+" 전")
         cell.foregroundAddress.text = String(article[indexPath.row]["locationString"] as! String)
         
@@ -225,10 +265,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         cell.shareBtn.tag = indexPath.row
         cell.commentBtn.addTarget(self, action: #selector(self.commentAction(_:)), forControlEvents: .TouchUpInside)
         cell.shareBtn.addTarget(self, action: #selector(self.shareAction(_:)), forControlEvents: .TouchUpInside)
-        
-        
-        
-        
         
         switch article[indexPath.row]["category"] as! String {
         case "medical":
@@ -256,17 +292,18 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     @IBAction func collapseAction(sender: AnyObject) {
         
         //열려있으면 접기
-        if(collapsibleConstraint.constant == 215)
+        if(collapsibleConstraint.constant == 315)
         {
-            
             UIView.animateWithDuration(0.3, delay: 0, options: .CurveEaseIn, animations: {
                 self.myLocationBtn.alpha = 0
                 //self.myLocationBtnConstraint.constant = 0
                 self.floatBtnConstraint.active = false
                 //self.MapView.alpha = 0
                 self.MapView.alpha = 1
-                self.collapsibleConstraint.constant = 0
-                self.collapseBtnConstraint.constant = 68 //탑과 버튼사이
+                
+                //print(self.collapseBtnConstraint.constant)
+                self.collapseBtnConstraint.constant = 67 //탑과 버튼사이
+                self.collapsibleConstraint.constant = 8
                 self.collapseBtn.hidden = true
                 //self.collapseBtn.transform = CGAffineTransformMakeRotation(CGFloat(M_PI))
                 self.view.layoutIfNeeded()}, completion: {
@@ -281,15 +318,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
             
         //닫혀있으면 열기
-        else if(collapsibleConstraint.constant == 0){
+        else if(collapsibleConstraint.constant == 8){
             UIView.animateWithDuration(0.3, delay: 0, options: .CurveEaseIn, animations: {
                 self.floatBtnConstraint.active = true
-                self.myLocationBtnConstraint.constant = 40
                 self.myLocationBtn.alpha = 1
                 self.MapView.alpha = 1
-                self.collapsibleConstraint.constant = 215
                 self.collapseBtn.hidden = true
-                self.collapseBtnConstraint.constant = 259
+                self.collapseBtnConstraint.constant = 357
+                self.collapsibleConstraint.constant = 315
                 //self.collapseBtn.transform = CGAffineTransformMakeRotation(CGFloat(M_PI*2))
                 
                 self.view.layoutIfNeeded()}, completion: {
@@ -318,15 +354,30 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             let existingObject = self.article[sender!.tag]
             let newObject = PFObject(className: "article")
             
-            //print(existingObject)
+            print(existingObject)
             
+            
+            
+            //기존
             newObject["user"] = PFUser.currentUser()
             newObject["content"] = existingObject["content"]
+            newObject["authorNick"] = self.myName
+            newObject["authorId"] = PFUser.currentUser()?.objectId!
             
             newObject["location"] = existingObject["location"]
             
             if let image = existingObject["image"]{
+                newObject["numOfPhotos"] = 1
                 newObject["image"] = image
+                
+                let postPhotoObject = PFObject(className: "PostPhoto")
+                let nowData = NSDate().toString()!
+                newObject["photoKey"] = nowData
+                postPhotoObject["key"] = nowData
+                postPhotoObject["photoFile"] = image
+                postPhotoObject.saveInBackground()
+            }else{
+                newObject["numOfPhotos"] = 0
             }
             
             //newObject["shareCount"] = existingObject["shareCount"] as! Int + 1
@@ -338,6 +389,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             newObject.saveInBackgroundWithBlock({
                 (succeeded: Bool, error: NSError?) -> Void in
                 if succeeded == true{
+
                     let succesView = SCLAlertView()
                     succesView.showCloseButton = false
                     succesView.addButton("확인", action: {})
@@ -393,7 +445,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             print("취소")
         }
         alertView.showCloseButton = false
-        alertView.showEdit("123", subTitle: "123")
+        alertView.showEdit("공유하기", subTitle: "공유하시겠습니까?")
     }
     
     func mapView(mapView: MGLMapView, tapOnCalloutForAnnotation annotation: MGLAnnotation) {
@@ -408,13 +460,23 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         self.map.deselectAnnotation(annotation, animated: false)
         
         //자주 에러남
-        let titleInt:Int = Int(annotation.title!!)!
-        let indexPath = NSIndexPath(forItem: titleInt, inSection: 0)
-        performSegueWithIdentifier("FromMainToDetail", sender: indexPath)
+        
+        if let titleInt:Int = Int(annotation.title!!){
+            let indexPath = NSIndexPath(forItem: titleInt, inSection: 0)
+            performSegueWithIdentifier("FromMainToDetail", sender: indexPath)
+        }
+        
         
     }
     
     func reloadData(){
+        
+        //table 초기화
+        self.article = []
+        self.tableView.dataSource = self
+        self.tableView.delegate = self
+        //self.tableView.reloadData()
+        
         var query = PFQuery(className: "article")
         query.orderByDescending("createdAt")
         query.findObjectsInBackgroundWithBlock{
@@ -424,29 +486,35 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             }
             else{
                 print("정보 가져옴")
-                self.article = objects!
-                self.tableView.dataSource = self
-                self.tableView.delegate = self
-                self.tableView.reloadData()
-                let firstIdx = NSIndexSet(index: 0)
-                self.tableView.reloadSections(firstIdx, withRowAnimation: .Automatic)
-                self.tableView.tableFooterView = UIView()
-                //애닌메이션 없음
-                //self.tableView.reloadData()
-                self.markers.removeAll()
-                if self.article.count != 0{
-                    for i in 0...self.article.count-1{
-                        //let
-                        let pfPoint = self.article[i]["location"] as! PFGeoPoint
-                        let cllocation = CLLocationCoordinate2D(latitude: pfPoint.latitude, longitude: pfPoint.longitude)
-                        let point = MGLPointAnnotation()
-                        point.coordinate = cllocation
-                        //point.performSelector(#selector(self.moveToDetail(_:)))
-                        point.title = String(i)
-                        point.subtitle = "Welcome to my marker"
-                        
-                        self.markers.append(point)
-                        self.map?.addAnnotation(point)
+                print(objects!)
+                
+                if self.article != objects!{
+                    self.article = objects!
+                    self.tableView.dataSource = self
+                    self.tableView.delegate = self
+                    self.tableView.reloadData()
+                    self.activityIndc.hidden = true
+                    self.activityIndc.stopAnimating()
+                    //let firstIdx = NSIndexSet(index: 0)
+                    //self.tableView.reloadSections(firstIdx, withRowAnimation: .Automatic)
+                    self.tableView.tableFooterView = UIView()
+                    //애닌메이션 없음
+                    //self.tableView.reloadData()
+                    self.markers.removeAll()
+                    if self.article.count != 0{
+                        for i in 0...self.article.count-1{
+                            //let
+                            let pfPoint = self.article[i]["location"] as! PFGeoPoint
+                            let cllocation = CLLocationCoordinate2D(latitude: pfPoint.latitude, longitude: pfPoint.longitude)
+                            let point = MGLPointAnnotation()
+                            point.coordinate = cllocation
+                            //point.performSelector(#selector(self.moveToDetail(_:)))
+                            point.title = String(i)
+                            point.subtitle = "Welcome to my marker"
+                            
+                            self.markers.append(point)
+                            self.map?.addAnnotation(point)
+                        }
                     }
                 }
             }
@@ -484,6 +552,44 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             }
         }
     }
+    func mapView(mapView: MGLMapView, imageForAnnotation annotation: MGLAnnotation) -> MGLAnnotationImage? {
+        // Try to reuse the existing ‘pisa’ annotation image, if it exists
+        var annotationImage = mapView.dequeueReusableAnnotationImageWithIdentifier("point")
+        if annotationImage == nil {
+            // Leaning Tower of Pisa by Stefan Spieler from the Noun Project
+            var image:UIImage!
+            print(annotation.title)
+            image = Toucan(image: UIImage(named: "bin_marker")!).resize(CGSize(width: 20, height: 20)).image
+            image = image.imageWithAlignmentRectInsets(UIEdgeInsetsMake(0, 0, image.size.height/2, 0))
+            // Initialize the ‘pisa’ annotation image with the UIImage we just loaded
+            annotationImage = MGLAnnotationImage(image: image, reuseIdentifier: "pin")
+        }
+        return annotationImage
+    }
+    
+    /*
+    func mapView(mapView: MGLMapView, imageForAnnotation annotation: MGLAnnotation) -> MGLAnnotationImage? {
+        // Try to reuse the existing ‘pisa’ annotation image, if it exists
+        var annotationImage = mapView.dequeueReusableAnnotationImageWithIdentifier("point")
+        if annotationImage == nil {
+            // Leaning Tower of Pisa by Stefan Spieler from the Noun Project
+            var image:UIImage!
+            
+            image = Toucan(image: UIImage(named: "bin_marker")!).resize(CGSize(width: 30, height: 30)).image
+            image = image.imageWithAlignmentRectInsets(UIEdgeInsetsMake(0, 0, image.size.height/2, 0))
+            // Initialize the ‘pisa’ annotation image with the UIImage we just loaded
+            annotationImage = MGLAnnotationImage(image: image, reuseIdentifier: "pin")
+            }
+        return annotationImage
+    }
+            */
+        
+
+    
+    
+    
+    
+ 
     
     
     

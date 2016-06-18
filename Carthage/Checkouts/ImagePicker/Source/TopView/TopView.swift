@@ -19,13 +19,13 @@ class TopView: UIView {
 
   lazy var flashButton: UIButton = { [unowned self] in
     let button = UIButton()
-    button.setImage(self.getImage("AUTO"), forState: .Normal)
+    button.setImage(AssetManager.getImage("AUTO"), forState: .Normal)
     button.setTitle("AUTO", forState: .Normal)
     button.titleEdgeInsets = UIEdgeInsetsMake(0, 4, 0, 0)
     button.setTitleColor(.whiteColor(), forState: .Normal)
     button.setTitleColor(.whiteColor(), forState: .Highlighted)
     button.titleLabel?.font = Configuration.flashButton
-    button.addTarget(self, action: "flashButtonDidPress:", forControlEvents: .TouchUpInside)
+    button.addTarget(self, action: #selector(flashButtonDidPress(_:)), forControlEvents: .TouchUpInside)
     button.contentHorizontalAlignment = .Left
 
     return button
@@ -33,8 +33,8 @@ class TopView: UIView {
 
   lazy var rotateCamera: UIButton = { [unowned self] in
     let button = UIButton()
-    button.setImage(self.getImage("cameraIcon"), forState: .Normal)
-    button.addTarget(self, action: "rotateCameraButtonDidPress:", forControlEvents: .TouchUpInside)
+    button.setImage(AssetManager.getImage("cameraIcon"), forState: .Normal)
+    button.addTarget(self, action: #selector(rotateCameraButtonDidPress(_:)), forControlEvents: .TouchUpInside)
     button.imageView?.contentMode = .Center
 
     return button
@@ -72,13 +72,13 @@ class TopView: UIView {
   // MARK: - Action methods
 
   func flashButtonDidPress(button: UIButton) {
-    currentFlashIndex++
+    currentFlashIndex += 1
     currentFlashIndex = currentFlashIndex % flashButtonTitles.count
 
     switch currentFlashIndex {
     case 1:
-      button.setTitleColor(UIColor(red:0.98, green:0.98, blue:0.45, alpha:1), forState: .Normal)
-      button.setTitleColor(UIColor(red:0.52, green:0.52, blue:0.24, alpha:1), forState: .Highlighted)
+      button.setTitleColor(UIColor(red: 0.98, green: 0.98, blue: 0.45, alpha: 1), forState: .Normal)
+      button.setTitleColor(UIColor(red: 0.52, green: 0.52, blue: 0.24, alpha: 1), forState: .Highlighted)
     default:
       button.setTitleColor(.whiteColor(), forState: .Normal)
       button.setTitleColor(.whiteColor(), forState: .Highlighted)
@@ -86,7 +86,7 @@ class TopView: UIView {
 
     let newTitle = flashButtonTitles[currentFlashIndex]
 
-    button.setImage(getImage(newTitle), forState: .Normal)
+    button.setImage(AssetManager.getImage(newTitle), forState: .Normal)
     button.setTitle(newTitle, forState: .Normal)
 
     delegate?.flashButtonDidPress(newTitle)
@@ -94,20 +94,5 @@ class TopView: UIView {
 
   func rotateCameraButtonDidPress(button: UIButton) {
     delegate?.rotateDeviceDidPress()
-  }
-
-  // MARK: - Private helpers
-
-  func getImage(name: String) -> UIImage {
-    let traitCollection = UITraitCollection(displayScale: 3)
-    var bundle = NSBundle(forClass: self.classForCoder)
-
-    if let bundlePath = NSBundle(forClass: self.classForCoder).resourcePath?.stringByAppendingString("/ImagePicker.bundle"), resourceBundle = NSBundle(path: bundlePath) {
-      bundle = resourceBundle
-    }
-    
-    guard let image = UIImage(named: name, inBundle: bundle, compatibleWithTraitCollection: traitCollection) else { return UIImage() }
-
-    return image
   }
 }

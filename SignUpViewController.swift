@@ -63,6 +63,21 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
         */
         
         // Do any additional setup after loading the view.
+        
+        
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        if (PFUser.currentUser() != nil){
+            print("아이디 없음.")
+            //self.performSegueWithIdentifier("FromSignToMain", sender: self)
+            dispatch_async(dispatch_get_main_queue()){
+                [unowned self] in
+                self.performSegueWithIdentifier("FromSignToMain", sender: self)
+            }
+        }else{
+            print("아이디 있음.")
+        }
     }
     
     override func viewDidAppear(animated: Bool) {

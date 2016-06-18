@@ -20,17 +20,14 @@ import XCGLogger
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    let log = XCGLogger.defaultInstance()
+    //let log = XCGLogger.defaultInstance()
     
-    
-
-
-
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
         let configuration = ParseClientConfiguration{
             $0.applicationId = "yec3pFNbkmIi9d4V25Y5Ki2EyhAWXHqL4A1ByD77"
             $0.clientKey = "0Y4pLg8rHBeTDc24CllqcF8mQHsfVlYLXz31jmoc"
+            $0.server = "https://api.shareyourlight.io/parse"
         }
             Parse.initializeWithConfiguration(configuration)
         
@@ -39,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return urls[urls.endIndex - 1]
         }()
         let logPath: NSURL = cacheDirectory.URLByAppendingPathComponent("app.log")
-        log.setup(.Debug, showThreadName: false, showLogLevel: false, showFileNames: false, showLineNumbers: true, writeToFile: logPath, fileLogLevel: .Debug)
+        //log.setup(.Debug, showThreadName: false, showLogLevel: false, showFileNames: false, showLineNumbers: true, writeToFile: logPath, fileLogLevel: .Debug)
         //log.setup(.Debug, showThreadName: true, showLogLevel: true, showFileNames: true, showLineNumbers: true, writeToFile: "path/to/file", fileLogLevel: .Debug)
         
         
