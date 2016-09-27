@@ -8,7 +8,7 @@ public struct Configuration {
   public static var mainColor = UIColor(red: 0.09, green: 0.11, blue: 0.13, alpha: 1)
   public static var noImagesColor = UIColor(red: 0.86, green: 0.86, blue: 0.86, alpha: 1)
   public static var noCameraColor = UIColor(red: 0.86, green: 0.86, blue: 0.86, alpha: 1)
-  public static var settingsColor = UIColor.whiteColor()
+  public static var settingsColor = UIColor.white
 
   // MARK: Fonts
 
@@ -33,10 +33,23 @@ public struct Configuration {
   // MARK: Dimensions
 
   public static var cellSpacing: CGFloat = 2
-    
+  public static var indicatorWidth: CGFloat = 41
+  public static var indicatorHeight: CGFloat = 8
+
   // MARK: Custom behaviour
-  
+
   public static var canRotateCamera = true
   public static var collapseCollectionViewWhileShot = true
   public static var recordLocation = true
+
+  // MARK: Images
+    
+  public static var indicatorView: UIView = {
+    let view = UIView()
+    view.backgroundColor = UIColor.white.withAlphaComponent(0.6)
+    view.layer.cornerRadius = 4
+    view.translatesAutoresizingMaskIntoConstraints = false
+        
+    return view
+  }()
 }

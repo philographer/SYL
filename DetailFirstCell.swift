@@ -26,11 +26,11 @@ class DetailFirstCell: UITableViewCell {
     @IBOutlet var collapseBtn: UIButton!
     
     
-    @IBAction func collapseAction(sender: AnyObject) {
+    @IBAction func collapseAction(_ sender: AnyObject) {
         print("버튼 클릭")
         
         if self.collapseBtnConstraint.constant == 339{
-            UIView.animateWithDuration(0.3, delay: 0, options: .CurveEaseIn, animations: {
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseIn, animations: {
                 self.mapView.alpha = 0
                 //self.mapHeightConstraint.active = false
                 self.collapseBtnConstraint.constant = 72
@@ -40,18 +40,18 @@ class DetailFirstCell: UITableViewCell {
                 */
                 let superTableView = self.superview?.superview as! UITableView
                 //섹션
-                var section = NSIndexSet(index: 2)
+                var section = IndexSet(integer: 2)
                 //superTableView.reloadSections(section, withRowAnimation: .Automatic)
-                section = NSIndexSet(index: 1)
-                superTableView.reloadSections(section, withRowAnimation: .None)               
+                section = IndexSet(integer: 1)
+                superTableView.reloadSections(section, with: .none)               
                 self.layoutIfNeeded()
                 }, completion: {
                     finished in print("지도 접기")
-                    self.collapseBtn.setImage(UIImage(named: "down"), forState: .Normal)
+                    self.collapseBtn.setImage(UIImage(named: "down"), for: UIControlState())
             })
         }
         else{
-            UIView.animateWithDuration(0.3, delay: 0, options: .CurveEaseIn, animations: {
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseIn, animations: {
                 self.mapView.alpha = 1
                 self.collapseBtnConstraint.constant = 339
                 self.mapHeightConstraint.constant = 290
@@ -59,15 +59,15 @@ class DetailFirstCell: UITableViewCell {
                 
                 //부모테이블
                 let superTableView = self.superview?.superview as! UITableView
-                var section = NSIndexSet(index: 2)
+                var section = IndexSet(integer: 2)
                 //superTableView.reloadSections(section, withRowAnimation: .Automatic)
-                section = NSIndexSet(index: 1)
-                superTableView.reloadSections(section, withRowAnimation: .None)
+                section = IndexSet(integer: 1)
+                superTableView.reloadSections(section, with: .none)
                 
                 self.layoutIfNeeded()
                 }, completion: {
                     finished in print("지도 접기")
-                    self.collapseBtn.setImage(UIImage(named: "up"), forState: .Normal)
+                    self.collapseBtn.setImage(UIImage(named: "up"), for: UIControlState())
             })
         }
     }

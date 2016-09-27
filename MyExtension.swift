@@ -32,13 +32,13 @@ extension UIViewController {
     }
     
     func viewUpByKeyboard(){
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(UIViewController.keyboardWillShow(_:)), name: UIKeyboardWillShowNotification, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(UIViewController.keyboardWillHide(_:)), name: UIKeyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(UIViewController.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(UIViewController.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
     
-    func keyboardWillShow(notification: NSNotification) {
+    func keyboardWillShow(_ notification: Notification) {
         if self.view.tag == 0{
-            if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
+            if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
                 print("키보드 올라가기전 y\(self.view.frame.origin.y)")
                 self.view.frame.origin.y -= keyboardSize.height
                 self.view.tag = 1
@@ -47,7 +47,7 @@ extension UIViewController {
         
     }
     
-    func keyboardWillHide(notification: NSNotification) {
+    func keyboardWillHide(_ notification: Notification) {
         if self.view.tag == 1{
             self.view.frame.origin.y = 0
             self.view.tag = 0
@@ -56,19 +56,19 @@ extension UIViewController {
 }
 
 extension ViewController: UITextViewDelegate{
-    func textViewDidChange(textView: UITextView) {
+    func textViewDidChange(_ textView: UITextView) {
         print("텍스트뷰 바뀌었는데 왜 안 불리냐 --")
         tableView.beginUpdates()
         tableView.endUpdates()
     }
-    func textViewDidEndEditing(textView: UITextView) {
+    func textViewDidEndEditing(_ textView: UITextView) {
         print("엔딩")
     }
 }
 
 extension ViewController: UITextFieldDelegate{
     
-    func textFieldDidEndEditing(textField: UITextField) {
+    func textFieldDidEndEditing(_ textField: UITextField) {
         print("아아")
     }
     

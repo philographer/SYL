@@ -14,7 +14,10 @@ let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
 let log: XCGLogger = {
     // Setup XCGLogger
     let log = XCGLogger.defaultInstance()
-    log.xcodeColorsEnabled = true // Or set the XcodeColors environment variable in your scheme to YES
+    log.xcodeColorsEnabled = false  // Set to true or set the XcodeColors environment variable in your scheme to YES, to enable coloured logs.
+                                    // Note: You need the XcodeColors Plug-in https://github.com/robbiehanson/XcodeColors installed in Xcode
+                                    // to see colours in the Xcode console. Plug-ins have been disabled in Xcode 8, so offically you can not see
+                                    // coloured logs in Xcode 8.
     log.xcodeColors = [
         .Verbose: .lightGrey,
         .Debug: .darkGrey,
@@ -79,8 +82,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
-}
-
-func noop() {
-    // Global no operation function, useful for doing nothing in a switch option, and examples
 }

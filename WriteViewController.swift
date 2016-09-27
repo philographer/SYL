@@ -40,12 +40,12 @@ class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDele
         //mapbox
         map = MGLMapView(frame: self.MapView.bounds,styleURL: MGLStyle.lightStyleURL())
         let center = CLLocationCoordinate2D(latitude: 37.3815495, longitude: 126.6515717)
-        map!.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
+        map!.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         //set the map's center coordinate
-        map!.setCenterCoordinate(center,zoomLevel: 12, animated: false)
-        map!.userTrackingMode = MGLUserTrackingMode.FollowWithHeading
+        map!.setCenter(center,zoomLevel: 12, animated: false)
+        map!.userTrackingMode = MGLUserTrackingMode.followWithHeading
         self.MapView.addSubview(map!)
-        map!.attributionButton.hidden = true
+        map!.attributionButton.isHidden = true
         self.writeButton.layer.zPosition = 99
         // Do any additional setup after loading the view.
         
@@ -54,7 +54,7 @@ class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDele
         self.map!.addGestureRecognizer(gesture)
         
         //버튼 셰도우
-        self.writeButton.layer.shadowColor = UIColor.blackColor().CGColor
+        self.writeButton.layer.shadowColor = UIColor.black.cgColor
         self.writeButton.layer.shadowOffset = CGSize(width: 5, height: 10)
         self.writeButton.layer.shadowRadius = 5
         self.writeButton.layer.shadowOpacity = 1.0
@@ -96,26 +96,26 @@ class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDele
                 
                 print("latitude is \(Double(latitude))")
                 print("longitude is \(Double(longitude))")
-                Alamofire.request(.GET, "https://apis.daum.net/local/geo/coord2addr?apikey=4114464a2e37e1b9cca0145006f8a366&longitude=\(Double(longitude))&latitude=\(Double(latitude))&inputCoordSystem=WGS84&output=json", parameters: nil, encoding: .JSON).responseJSON{
+                Alamofire.request(.GET, "https://apis.daum.net/local/geo/coord2addr?apikey=4114464a2e37e1b9cca0145006f8a366&longitude=\(Double(longitude))&latitude=\(Double(latitude))&inputCoordSystem=WGS84&output=json", parameters: nil, encoding: .json).responseJSON{
                     response in
                     print(response)
                     switch response.result {
-                    case .Success: break
+                    case .success: break
                         /*
                         if let value = response.result.value {
                             //let json = JSON(value)
                             //self.nowLocationLabel.text = json["fullName"].stringValue
                         }
                         */
-                    case .Failure(let error):
+                    case .failure(let error):
                         alertView.showError("주소 찾기 에러", subTitle: "현재 주소를 찾을 수 없습니다.\(error) GPS설정을 확인해 주세요")
                     }
                 }
             }
         }
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(UIViewController.keyboardWillShow(_:)), name: UIKeyboardWillShowNotification, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(UIViewController.keyboardWillHide(_:)), name: UIKeyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(UIViewController.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(UIViewController.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
         print("category \(category)")
         
@@ -123,12 +123,12 @@ class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDele
         self.textView.delegate = self
         placeholderLabel = UILabel()
         placeholderLabel.text = "여기를 눌러 글을 작성하세요"
-        placeholderLabel.font = UIFont.italicSystemFontOfSize(self.textView.font!.pointSize)
+        placeholderLabel.font = UIFont.italicSystemFont(ofSize: self.textView.font!.pointSize)
         placeholderLabel.sizeToFit()
         self.textView.addSubview(placeholderLabel)
-        placeholderLabel.frame.origin = CGPointMake(5, self.textView.font!.pointSize / 2)
+        placeholderLabel.frame.origin = CGPoint(x: 5, y: self.textView.font!.pointSize / 2)
         placeholderLabel.textColor = UIColor(white: 1, alpha: 0.3)
-        placeholderLabel.hidden = !self.textView.text.isEmpty
+        placeholderLabel.isHidden = !self.textView.text.isEmpty
         
         
         
@@ -139,7 +139,7 @@ class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDele
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    @IBAction func WriteAction(sender: AnyObject) {
+    @IBAction func WriteAction(_ sender: AnyObject) {
         let alertView = SCLAlertView()
         alertView.showCloseButton = false
         alertView.addButton("확인", action: {
@@ -149,7 +149,7 @@ class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDele
         
         if let userLocation = self.map?.userLocation{
             if let userRealLocation = userLocation.location{
-                UIView.animateWithDuration(1, animations: {self.progressBar.alpha = 1}, completion: nil)
+                UIView.animate(withDuration: 1, animations: {self.progressBar.alpha = 1}, completion: nil)
                 
                 let latitude:Double = userRealLocation.coordinate.latitude
                 let longitude:Double = userRealLocation.coordinate.longitude
@@ -158,25 +158,25 @@ class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDele
                 let postPhotoObject = PFObject(className: "PostPhoto")
                 
                 //유져 닉네임 꺼내오기
-                let thisUser = PFUser.currentUser()!
-                thisUser.fetchIfNeededInBackgroundWithBlock {
+                let thisUser = PFUser.current()!
+                thisUser.fetchIfNeededInBackground {
                     (user: PFObject?, error: NSError?) -> Void in
                     if let userName = user?["nickname"]{
                         let point = PFGeoPoint(latitude: latitude, longitude: longitude)
                         articleObject["content"] = self.textView.text
-                        articleObject["user"] = PFUser.currentUser()
-                        articleObject["authorId"] = PFUser.currentUser()?.objectId
+                        articleObject["user"] = PFUser.current()
+                        articleObject["authorId"] = PFUser.current()?.objectId
                         articleObject["authorNick"] = userName as? String
                         articleObject["location"] = point
                         articleObject["category"] = self.category
                         articleObject["shareCount"] = 0
                         articleObject["commentCount"] = 0
                         articleObject["numOfPhotos"] = 0
-                        Alamofire.request(.GET, "https://apis.daum.net/local/geo/coord2addr?apikey=4114464a2e37e1b9cca0145006f8a366&longitude=\(longitude)&latitude=\(latitude)&inputCoordSystem=WGS84&output=json", parameters: nil, encoding: .JSON).responseJSON{
+                        Alamofire.request(.GET, "https://apis.daum.net/local/geo/coord2addr?apikey=4114464a2e37e1b9cca0145006f8a366&longitude=\(longitude)&latitude=\(latitude)&inputCoordSystem=WGS84&output=json", parameters: nil, encoding: .json).responseJSON{
                             response in
                             print(response)
                             switch response.result {
-                            case .Success:
+                            case .success:
                                 if let value = response.result.value {
                                     let json = JSON(value)
                                     print("JSON: \(json["SUCCESS"])")
@@ -186,22 +186,22 @@ class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDele
                                         let imageData = UIImageJPEGRepresentation(userImage, 0.1)
                                         if let imageFile = PFFile(name:"image.jpg", data:imageData!){
                                             //이미지 업로드
-                                            imageFile.saveInBackgroundWithBlock({
+                                            imageFile.saveInBackground({
                                                 (succeeded: Bool, error: NSError?) -> Void in
                                                 if succeeded == true{
                                                     articleObject["image"] = imageFile
                                                     postPhotoObject["photoFile"] = imageFile
                                                     
-                                                    let nowData = NSDate().toString()!
+                                                    let nowData = Date().toString()!
                                                     articleObject["photoKey"] = nowData
                                                     postPhotoObject["key"] = nowData
                                                     
                                                     articleObject["numOfPhotos"] = 1
-                                                    articleObject.saveInBackgroundWithBlock{
+                                                    articleObject.saveInBackground{
                                                         (success: Bool, error: NSError?) -> Void in
                                                         if(success){
                                                             postPhotoObject.saveInBackground()
-                                                            self.dismissViewControllerAnimated(true, completion: nil)
+                                                            self.dismiss(animated: true, completion: nil)
                                                         }
                                                         else{
                                                             alertView.showError("게시글 업로드 에러", subTitle: "\(error!)")
@@ -223,10 +223,10 @@ class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDele
                                         }
                                     }
                                     else{
-                                        articleObject.saveInBackgroundWithBlock{
+                                        articleObject.saveInBackground{
                                             (success: Bool, error: NSError?) -> Void in
                                             if(success){
-                                                self.dismissViewControllerAnimated(true, completion: nil)
+                                                self.dismiss(animated: true, completion: nil)
                                             }
                                             else{
                                                 alertView.showError("게시글 업로드 에러", subTitle: "\(error!)")
@@ -234,7 +234,7 @@ class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDele
                                         }
                                     }
                                 }
-                            case .Failure(let error):
+                            case .failure(let error):
                                 alertView.showError("주소 찾기 에러", subTitle: "현재 주소를 찾을 수 없습니다.\(error) GPS설정을 확인해 주세요")
                             }
                         }
@@ -250,42 +250,42 @@ class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDele
         }
     }
     
-    @IBAction func BackAction(sender: AnyObject) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func BackAction(_ sender: AnyObject) {
+        self.dismiss(animated: true, completion: nil)
     }
     
-    func wrapperDidPress(images: [UIImage]) {
+    func wrapperDidPress(_ images: [UIImage]) {
         
     }
     
-    func doneButtonDidPress(images: [UIImage]) {
+    func doneButtonDidPress(_ images: [UIImage]) {
         print("done")
         self.userSelectImages = images
         self.userSelectImage.image = images[0]
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
     }
     
     func cancelButtonDidPress() {
         
     }
-    @IBAction func ImageSelectAction(sender: AnyObject) {
+    @IBAction func ImageSelectAction(_ sender: AnyObject) {
         let imagePickerController = ImagePickerController()
         imagePickerController.delegate = self
         imagePickerController.imageLimit = 1
         Configuration.noImagesTitle = "Sorry! There are no images here!"
-        self.presentViewController(imagePickerController, animated: true, completion: nil)
+        self.present(imagePickerController, animated: true, completion: nil)
     }
     
-    func endEditting(sender:UITapGestureRecognizer){
+    func endEditting(_ sender:UITapGestureRecognizer){
         print("endEditting")
         self.view.endEditing(true)
         // do other task
     }
 
-    @IBAction func myLocation(sender: AnyObject) {
+    @IBAction func myLocation(_ sender: AnyObject) {
         if let Location = self.map!.userLocation{
             if let myLocation:CLLocationCoordinate2D = Location.coordinate{
-                self.map!.setCenterCoordinate(myLocation, zoomLevel: 15, animated: true)
+                self.map!.setCenter(myLocation, zoomLevel: 15, animated: true)
                 
                 print(myLocation.latitude)
                 print(myLocation.longitude)
@@ -293,12 +293,12 @@ class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDele
         }
     }
     
-    override func keyboardWillShow(notification: NSNotification) {
+    override func keyboardWillShow(_ notification: Notification) {
         if self.view.tag == 0{
-            if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
+            if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
                 print("키보드 올라가기전 y\(self.view.frame.origin.y)")
                 
-                UIView.animateWithDuration(0.5, animations: {
+                UIView.animate(withDuration: 0.5, animations: {
                 self.pickPhotoConstraint.constant += keyboardSize.height
                 })
                 
@@ -308,17 +308,17 @@ class WriteViewController: UIViewController, ImagePickerDelegate, UITextViewDele
         
     }
     
-    override func keyboardWillHide(notification: NSNotification) {
+    override func keyboardWillHide(_ notification: Notification) {
         if self.view.tag == 1{
-            UIView.animateWithDuration(0.5, animations: {
+            UIView.animate(withDuration: 0.5, animations: {
                 self.pickPhotoConstraint.constant = 20
             })
             self.view.tag = 0
         }
     }
     
-    func textViewDidChange(textView: UITextView) {
-        self.placeholderLabel.hidden = !textView.text.isEmpty
+    func textViewDidChange(_ textView: UITextView) {
+        self.placeholderLabel.isHidden = !textView.text.isEmpty
     }
     /*
     // MARK: - Navigation

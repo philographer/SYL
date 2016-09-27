@@ -61,29 +61,29 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         //mapbox
         map = MGLMapView(frame: self.MapView.bounds,
                              styleURL: MGLStyle.lightStyleURL())
-        map.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
-        map.attributionButton.hidden = true
+        map.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        map.attributionButton.isHidden = true
         self.MapView.addSubview(map)
         map.delegate = self
         //self.myName = "아트나비"
         
         //KFloat Button Add Item
-        self.floatBtn.openAnimationType = KCFABOpenAnimationType.SlideDown
+        self.floatBtn.openAnimationType = KCFABOpenAnimationType.slideDown
         self.floatBtn.addItem("기타", icon: UIImage(named: "other_btn")!, handler: {item in
-            self.performSegueWithIdentifier("writeViewController", sender: 1)
-            print("기타")}).buttonColor = UIColor.clearColor()
+            self.performSegue(withIdentifier: "writeViewController", sender: 1)
+            print("기타")}).buttonColor = UIColor.clear
         self.floatBtn.addItem("실종", icon: UIImage(named: "missing_btn")!, handler: {item in
-            self.performSegueWithIdentifier("writeViewController", sender: 2)
-            print("실종")}).buttonColor = UIColor.clearColor()
+            self.performSegue(withIdentifier: "writeViewController", sender: 2)
+            print("실종")}).buttonColor = UIColor.clear
         self.floatBtn.addItem("물자", icon: UIImage(named: "supply_btn")!, handler: {item in
-            self.performSegueWithIdentifier("writeViewController", sender: 3)
-            print("물자")}).buttonColor = UIColor.clearColor()
+            self.performSegue(withIdentifier: "writeViewController", sender: 3)
+            print("물자")}).buttonColor = UIColor.clear
         self.floatBtn.addItem("구조", icon: UIImage(named: "help_btn")!, handler: {item in
-            self.performSegueWithIdentifier("writeViewController", sender: 4)
-            print("구조")}).buttonColor = UIColor.clearColor()
+            self.performSegue(withIdentifier: "writeViewController", sender: 4)
+            print("구조")}).buttonColor = UIColor.clear
         self.floatBtn.addItem("의료", icon: UIImage(named: "medical_btn")!, handler: {item in
-            self.performSegueWithIdentifier("writeViewController", sender: 5)
-            print("의료")}).buttonColor = UIColor.clearColor()
+            self.performSegue(withIdentifier: "writeViewController", sender: 5)
+            print("의료")}).buttonColor = UIColor.clear
         
         //글쓰기 버튼 이미지
         self.floatBtn.buttonImage = UIImage(named: "write_btn")
@@ -92,25 +92,25 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         //알람버튼 뱃지 숨기기
-        self.alarmBtn.badgeBackgroundColor = UIColor.clearColor()
-        self.alarmBtn.badgeTextColor = UIColor.clearColor()
-        if(PFUser.currentUser() == nil){ //회원가입 안 했으면 메인으로
+        self.alarmBtn.badgeBackgroundColor = UIColor.clear
+        self.alarmBtn.badgeTextColor = UIColor.clear
+        if(PFUser.current() == nil){ //회원가입 안 했으면 메인으로
             print("가입하지 않은 유져")
-            dispatch_async(dispatch_get_main_queue()){
+            DispatchQueue.main.async{
                 [unowned self] in
-                    self.performSegueWithIdentifier("FromMainToSign", sender: self)
+                    self.performSegue(withIdentifier: "FromMainToSign", sender: self)
             }
         }
         else{ //회원가입 했으면 유져트래킹모드
-            map!.userTrackingMode = MGLUserTrackingMode.FollowWithHeading
+            map!.userTrackingMode = MGLUserTrackingMode.followWithHeading
             //테이블뷰 갱신
-            self.activityIndc.hidden = false
+            self.activityIndc.isHidden = false
             self.activityIndc.startAnimating()
             self.reloadData()
-            let nowUser = PFUser.currentUser()! as PFUser
-            nowUser.fetchIfNeededInBackgroundWithBlock {
+            let nowUser = PFUser.current()! as PFUser
+            nowUser.fetchIfNeededInBackground {
                 (user: PFObject?, error: NSError?) -> Void in
                 print(user)
                 if let nickname = user?["nickname"]{
@@ -123,16 +123,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         //뷰가 사라질때
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
         //글쓰기 모드로 이동할때 카테고리 지정
         if segue.identifier == "writeViewController"{
             let senderInt = sender as! Int
-            let destController = segue.destinationViewController as! WriteViewController
+            let destController = segue.destination as! WriteViewController
             switch senderInt {
             case 1:
                 destController.category = "other"
@@ -151,7 +151,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         
         if segue.identifier == "FromMainToDetail"{ //메인 -> 디테일 segue
-            let destController = segue.destinationViewController as! DetailViewController
+            let destController = segue.destination as! DetailViewController
             destController.article = self.article[sender!.row]
             //print(self.article[sender!.row]["authorNick"])
             
@@ -167,28 +167,28 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 
             let query = PFQuery(className: "comment")
             query.whereKey("article", equalTo: self.article[sender!.row])
-            query.orderByAscending("createdAt")
-            query.findObjectsInBackgroundWithBlock{
+            query.order(byAscending: "createdAt")
+            query.findObjectsInBackground{
                 (objects: [PFObject]?, error: NSError?) -> Void in
                 if let error = error{
                     SCLAlertView().showError("Comment Error", subTitle: "코멘트 가져오기 에러 \(error)")
                 }
                 else{
                     destController.comments = objects!
-                    let section = NSIndexSet(index: 2)
-                    destController.tableView.reloadSections(section, withRowAnimation: .Automatic)
+                    let section = IndexSet(integer: 2)
+                    destController.tableView.reloadSections(section, with: .automatic)
                 }
             }
             destController.category = self.article[sender!.row]["category"] as! String
         }
         
         if segue.identifier == "FromMainToAlarm"{ //메인 -> 알람 segue
-            let destController = segue.destinationViewController as! AlamViewController
+            let destController = segue.destination as! AlamViewController
             destController.myName = self.myName
             let query = PFQuery(className: "alarm")
-            query.whereKey("toUser", equalTo: PFUser.currentUser()!)
-            query.orderByDescending("createdAt")
-            query.findObjectsInBackgroundWithBlock{
+            query.whereKey("toUser", equalTo: PFUser.current()!)
+            query.order(byDescending: "createdAt")
+            query.findObjectsInBackground{
                 (objects: [PFObject]?, error: NSError?) -> Void in
                 if let error = error{
                     SCLAlertView().showError("Comment Error", subTitle: "알람 가져오기 에러 \(error)")
@@ -197,8 +197,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     //print("알람 가져왔다 \(objects)")
                     destController.alarms = objects!
                     
-                    let section = NSIndexSet(index: 0)
-                    destController.tableView.reloadSections(section, withRowAnimation: .Automatic)
+                    let section = IndexSet(integer: 0)
+                    destController.tableView.reloadSections(section, with: .automatic)
                 }
             }
             
@@ -211,24 +211,24 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     
-    func mapView(mapView: MGLMapView, annotationCanShowCallout annotation: MGLAnnotation) -> Bool {
+    func mapView(_ mapView: MGLMapView, annotationCanShowCallout annotation: MGLAnnotation) -> Bool {
         // Always try to show a callout when an annotation is tapped.
         return true
     }
     
     // MARK: - Table view data source
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.article.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         //셀
-        let cell = tableView.dequeueReusableCellWithIdentifier("ArticleCell", forIndexPath: indexPath) as! ArticleCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleCell", for: indexPath) as! ArticleCell
         
         //간단한 날짜(ex 1분전, 12시간전, 3일전)
-        let stringDate = (article[indexPath.row].createdAt!).toNaturalString(NSDate(), inRegion: .None, style: FormatterStyle(style: .Abbreviated, max: 1))!
+        let stringDate = (article[(indexPath as NSIndexPath).row].createdAt!).toNaturalString(Date(), inRegion: .none, style: FormatterStyle(style: .abbreviated, max: 1))!
         
         //실제 닉네임 꺼내오기
         /*
@@ -243,30 +243,30 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             //cell.foregroundName.text = String(indexPath.row)
         })
         */
-        cell.foregroundName.text = article[indexPath.row]["authorNick"] as? String
+        cell.foregroundName.text = article[(indexPath as NSIndexPath).row]["authorNick"] as? String
         cell.backgroundColor = UIColor(red: 44/255, green: 43/255, blue: 43/255, alpha: 1)
         cell.foregroundContent.delegate = self
         
         let style = NSMutableParagraphStyle()
         style.lineSpacing = 10
         let attributes = [NSParagraphStyleAttributeName : style]
-        let contentText:String = article[indexPath.row]["content"] as! String
+        let contentText:String = article[(indexPath as NSIndexPath).row]["content"] as! String
         cell.foregroundContent.attributedText = NSAttributedString(string: contentText, attributes:attributes)
-        cell.foregroundContent.textColor = UIColor.whiteColor()
+        cell.foregroundContent.textColor = UIColor.white
         cell.foregroundContent.font = UIFont(name: "HelveticaNeue", size: 17.0)
         
-        cell.shareCount.text = String(article[indexPath.row]["shareCount"] as! Int)
-        cell.commentCount.text = String(article[indexPath.row]["commentCount"] as! Int)
+        cell.shareCount.text = String(article[(indexPath as NSIndexPath).row]["shareCount"] as! Int)
+        cell.commentCount.text = String(article[(indexPath as NSIndexPath).row]["commentCount"] as! Int)
         
         cell.foregroundTime.text = String(stringDate+" 전")
-        cell.foregroundAddress.text = String(article[indexPath.row]["locationString"] as! String)
+        cell.foregroundAddress.text = String(article[(indexPath as NSIndexPath).row]["locationString"] as! String)
         
-        cell.commentBtn.tag = indexPath.row
-        cell.shareBtn.tag = indexPath.row
-        cell.commentBtn.addTarget(self, action: #selector(self.commentAction(_:)), forControlEvents: .TouchUpInside)
-        cell.shareBtn.addTarget(self, action: #selector(self.shareAction(_:)), forControlEvents: .TouchUpInside)
+        cell.commentBtn.tag = (indexPath as NSIndexPath).row
+        cell.shareBtn.tag = (indexPath as NSIndexPath).row
+        cell.commentBtn.addTarget(self, action: #selector(self.commentAction(_:)), for: .touchUpInside)
+        cell.shareBtn.addTarget(self, action: #selector(self.shareAction(_:)), for: .touchUpInside)
         
-        switch article[indexPath.row]["category"] as! String {
+        switch article[(indexPath as NSIndexPath).row]["category"] as! String {
         case "medical":
             cell.foregroundImage.image = UIImage(named: "medical_icon")
         case "supply":
@@ -285,33 +285,33 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     // MARK: Table vie delegate
     
-     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        performSegueWithIdentifier("FromMainToDetail", sender: indexPath)   
+     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        performSegue(withIdentifier: "FromMainToDetail", sender: indexPath)   
     }
     
-    @IBAction func collapseAction(sender: AnyObject) {
+    @IBAction func collapseAction(_ sender: AnyObject) {
         
         //열려있으면 접기
         if(collapsibleConstraint.constant == 315)
         {
-            UIView.animateWithDuration(0.3, delay: 0, options: .CurveEaseIn, animations: {
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseIn, animations: {
                 self.myLocationBtn.alpha = 0
                 //self.myLocationBtnConstraint.constant = 0
-                self.floatBtnConstraint.active = false
+                self.floatBtnConstraint.isActive = false
                 //self.MapView.alpha = 0
                 self.MapView.alpha = 1
                 
                 //print(self.collapseBtnConstraint.constant)
                 self.collapseBtnConstraint.constant = 67 //탑과 버튼사이
                 self.collapsibleConstraint.constant = 8
-                self.collapseBtn.hidden = true
+                self.collapseBtn.isHidden = true
                 //self.collapseBtn.transform = CGAffineTransformMakeRotation(CGFloat(M_PI))
                 self.view.layoutIfNeeded()}, completion: {
                     finished in print("지도 접기")
-                    self.floatBtn.openAnimationType = KCFABOpenAnimationType.SlideUp
-                    UIView.animateWithDuration(0.1, delay: 0, options: .CurveEaseIn, animations: {
-                        self.collapseBtn.hidden = false
-                        self.collapseBtn.setImage(UIImage(named: "down"), forState: .Normal)
+                    self.floatBtn.openAnimationType = KCFABOpenAnimationType.slideUp
+                    UIView.animate(withDuration: 0.1, delay: 0, options: .curveEaseIn, animations: {
+                        self.collapseBtn.isHidden = false
+                        self.collapseBtn.setImage(UIImage(named: "down"), for: UIControlState())
                     }, completion:  nil)
             })
             
@@ -319,33 +319,33 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             
         //닫혀있으면 열기
         else if(collapsibleConstraint.constant == 8){
-            UIView.animateWithDuration(0.3, delay: 0, options: .CurveEaseIn, animations: {
-                self.floatBtnConstraint.active = true
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseIn, animations: {
+                self.floatBtnConstraint.isActive = true
                 self.myLocationBtn.alpha = 1
                 self.MapView.alpha = 1
-                self.collapseBtn.hidden = true
+                self.collapseBtn.isHidden = true
                 self.collapseBtnConstraint.constant = 357
                 self.collapsibleConstraint.constant = 315
                 //self.collapseBtn.transform = CGAffineTransformMakeRotation(CGFloat(M_PI*2))
                 
                 self.view.layoutIfNeeded()}, completion: {
                     finished in print("지도 펴기")
-                    self.floatBtn.openAnimationType = KCFABOpenAnimationType.SlideDown
-                    UIView.animateWithDuration(0.1, delay: 0, options: .CurveEaseIn, animations: {
-                        self.collapseBtn.hidden = false
-                        self.collapseBtn.setImage(UIImage(named: "up"), forState: .Normal)
+                    self.floatBtn.openAnimationType = KCFABOpenAnimationType.slideDown
+                    UIView.animate(withDuration: 0.1, delay: 0, options: .curveEaseIn, animations: {
+                        self.collapseBtn.isHidden = false
+                        self.collapseBtn.setImage(UIImage(named: "up"), for: UIControlState())
                         }, completion:  nil)
                     //self.view.removeConstraint(floatBtnConstraint)
             })
         }
     }
     
-    func commentAction(sender: AnyObject?){
-        let indexPath = NSIndexPath(forItem: sender!.tag, inSection: 0)
-        performSegueWithIdentifier("FromMainToDetail", sender: indexPath)
+    func commentAction(_ sender: AnyObject?){
+        let indexPath = IndexPath(item: sender!.tag, section: 0)
+        performSegue(withIdentifier: "FromMainToDetail", sender: indexPath)
     }
     
-    func shareAction(sender: AnyObject?){
+    func shareAction(_ sender: AnyObject?){
         print("공유하기 버튼 딱 눌렀을때 태그\(sender!.tag)")
         let alertView = SCLAlertView()
         alertView.addButton("공유하기", action: {
@@ -359,10 +359,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             
             
             //기존
-            newObject["user"] = PFUser.currentUser()
+            newObject["user"] = PFUser.current()
             newObject["content"] = existingObject["content"]
             newObject["authorNick"] = self.myName
-            newObject["authorId"] = PFUser.currentUser()?.objectId!
+            newObject["authorId"] = PFUser.current()?.objectId!
             
             newObject["location"] = existingObject["location"]
             
@@ -371,7 +371,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 newObject["image"] = image
                 
                 let postPhotoObject = PFObject(className: "PostPhoto")
-                let nowData = NSDate().toString()!
+                let nowData = Date().toString()!
                 newObject["photoKey"] = nowData
                 postPhotoObject["key"] = nowData
                 postPhotoObject["photoFile"] = image
@@ -386,7 +386,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             newObject["category"] = existingObject["category"]
             newObject["locationString"] = existingObject["locationString"]
             
-            newObject.saveInBackgroundWithBlock({
+            newObject.saveInBackground(block: {
                 (succeeded: Bool, error: NSError?) -> Void in
                 if succeeded == true{
 
@@ -399,17 +399,17 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     //공유 알람 전송
                     //자기가 아니면
                     let userName = (existingObject["user"] as! PFUser).username!
-                    let myName = PFUser.currentUser()!.username!
+                    let myName = PFUser.current()!.username!
                     
                     //알람 보냄
                     if userName != myName{
                         let alarmObject = PFObject(className: "alarm")
-                        alarmObject["fromUser"] = PFUser.currentUser()
+                        alarmObject["fromUser"] = PFUser.current()
                         alarmObject["toUser"] = existingObject["user"]
                         alarmObject["read"] = false
                         alarmObject["article"] = existingObject
                         alarmObject["category"] = 1
-                        alarmObject.saveInBackgroundWithBlock{
+                        alarmObject.saveInBackground{
                             (successed: Bool, error: NSError?) -> Void in
                             if successed == true{
                                 print("알람 성공적으로 전송")
@@ -429,7 +429,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 
             })
             existingObject["shareCount"] = existingObject["shareCount"] as! Int + 1
-            existingObject.saveInBackgroundWithBlock({
+            existingObject.saveInBackground(block: {
                 (succeeded: Bool, error: NSError?) -> Void in
                 if succeeded == true{
                     print("증가완료")
@@ -448,7 +448,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         alertView.showEdit("공유하기", subTitle: "공유하시겠습니까?")
     }
     
-    func mapView(mapView: MGLMapView, tapOnCalloutForAnnotation annotation: MGLAnnotation) {
+    func mapView(_ mapView: MGLMapView, tapOnCalloutFor annotation: MGLAnnotation) {
         // Optionally handle taps on the callout
         print("Tapped the callout for: \(annotation)")
         
@@ -456,14 +456,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         //self.mapView.deselectAnnotation(annotation, animated: true)
     }
     
-    func mapView(mapView: MGLMapView, didSelectAnnotation annotation: MGLAnnotation) {
+    func mapView(_ mapView: MGLMapView, didSelect annotation: MGLAnnotation) {
         self.map.deselectAnnotation(annotation, animated: false)
         
         //자주 에러남
         
         if let titleInt:Int = Int(annotation.title!!){
-            let indexPath = NSIndexPath(forItem: titleInt, inSection: 0)
-            performSegueWithIdentifier("FromMainToDetail", sender: indexPath)
+            let indexPath = IndexPath(item: titleInt, section: 0)
+            performSegue(withIdentifier: "FromMainToDetail", sender: indexPath)
         }
         
         
@@ -478,8 +478,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         //self.tableView.reloadData()
         
         var query = PFQuery(className: "article")
-        query.orderByDescending("createdAt")
-        query.findObjectsInBackgroundWithBlock{
+        query.order(byDescending: "createdAt")
+        query.findObjectsInBackground{
             (objects: [PFObject]?, error: NSError?) -> Void in
             if let error = error{
                 print("Article 가져오기 오류\(error)")
@@ -493,7 +493,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     self.tableView.dataSource = self
                     self.tableView.delegate = self
                     self.tableView.reloadData()
-                    self.activityIndc.hidden = true
+                    self.activityIndc.isHidden = true
                     self.activityIndc.stopAnimating()
                     //let firstIdx = NSIndexSet(index: 0)
                     //self.tableView.reloadSections(firstIdx, withRowAnimation: .Automatic)
@@ -521,10 +521,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         
         query = PFQuery(className: "alarm")
-        query.orderByDescending("createdAt")
-        query.whereKey("toUser", equalTo: PFUser.currentUser()!)
+        query.order(byDescending: "createdAt")
+        query.whereKey("toUser", equalTo: PFUser.current()!)
         query.whereKey("read", equalTo: false)
-        query.findObjectsInBackgroundWithBlock{
+        query.findObjectsInBackground{
             (objects: [PFObject]?, error: NSError?) -> Void in
             if let error = error{
                 print("Article 가져오기 오류\(error)")
@@ -534,33 +534,33 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 self.alarmBtn.badgeString = "\(objects!.count)"
                 if(objects!.count != 0){
                     self.alarmBtn.badgeEdgeInsets = nil
-                    self.alarmBtn.badgeBackgroundColor = UIColor.redColor()
-                    self.alarmBtn.badgeTextColor = UIColor.whiteColor()
+                    self.alarmBtn.badgeBackgroundColor = UIColor.red
+                    self.alarmBtn.badgeTextColor = UIColor.white
                     print("왜 0이죠")
                 }
             }
         }
     }
-    func moveToDetail(sender: AnyObject?){
+    func moveToDetail(_ sender: AnyObject?){
         print(sender)
     }
     
-    @IBAction func myLocationAction(sender: AnyObject) {
+    @IBAction func myLocationAction(_ sender: AnyObject) {
         if let Location = map.userLocation{
             if let myLocation:CLLocationCoordinate2D = Location.coordinate{
-                self.map.setCenterCoordinate(myLocation, zoomLevel: 15, animated: true)
+                self.map.setCenter(myLocation, zoomLevel: 15, animated: true)
             }
         }
     }
-    func mapView(mapView: MGLMapView, imageForAnnotation annotation: MGLAnnotation) -> MGLAnnotationImage? {
+    func mapView(_ mapView: MGLMapView, imageFor annotation: MGLAnnotation) -> MGLAnnotationImage? {
         // Try to reuse the existing ‘pisa’ annotation image, if it exists
-        var annotationImage = mapView.dequeueReusableAnnotationImageWithIdentifier("point")
+        var annotationImage = mapView.dequeueReusableAnnotationImage(withIdentifier: "point")
         if annotationImage == nil {
             // Leaning Tower of Pisa by Stefan Spieler from the Noun Project
             var image:UIImage!
             print(annotation.title)
             image = Toucan(image: UIImage(named: "bin_marker")!).resize(CGSize(width: 20, height: 20)).image
-            image = image.imageWithAlignmentRectInsets(UIEdgeInsetsMake(0, 0, image.size.height/2, 0))
+            image = image.withAlignmentRectInsets(UIEdgeInsetsMake(0, 0, image.size.height/2, 0))
             // Initialize the ‘pisa’ annotation image with the UIImage we just loaded
             annotationImage = MGLAnnotationImage(image: image, reuseIdentifier: "pin")
         }

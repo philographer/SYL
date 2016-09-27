@@ -1,5 +1,67 @@
 # Bolts CHANGELOG
 
+## 1.8.4
+
+**Fixed**
+- Fix potential breaking change related to dynamic library compatibility version.  
+  [#270](https://github.com/BoltsFramework/Bolts-ObjC/pull/270)
+  by [Nikita Lutsenko](https://github.com/nlutsenko)
+
+## 1.8.3
+
+**Fixed**
+- Fix potential deadlock when using `BFTask.-waitUntilFinished`.  
+  [#263](https://github.com/BoltsFramework/Bolts-ObjC/pull/263)
+  by [Nikita Lutsenko](https://github.com/nlutsenko)
+
+
+## 1.8.2
+
+**Fixed**
+- Fixed custom build frameworks script.  
+  [#263](https://github.com/BoltsFramework/Bolts-ObjC/pull/263)
+  by [Nikita Lutsenko](https://github.com/nlutsenko)
+- Fixed incorrect dynamic framework install name base and install name making dynamic framework not load in some cases.  
+  [#266](https://github.com/BoltsFramework/Bolts-ObjC/pull/266)
+  by [Nikita Lutsenko](https://github.com/nlutsenko)
+- Fixed compilation of dynamic frameworks for watchOS/tvOS when no code signing identity is present.  
+  [#266](https://github.com/BoltsFramework/Bolts-ObjC/pull/266)
+  by [Nikita Lutsenko](https://github.com/nlutsenko)
+
+## 1.8.1
+
+**Fixed**
+- Fixed compilation of dynamic frameworks due to codesigning requirements.  
+  [#260](https://github.com/BoltsFramework/Bolts-ObjC/pull/260)
+  by [Nikita Lutsenko](https://github.com/nlutsenko)
+
+## 1.8.0
+
+**New**
+- Deprecated exception catching in `BFTask`. This feature will be removed in `1.9.0`.  
+  Read [here](https://github.com/BoltsFramework/Bolts-ObjC/issues/252) on the motivation and follow the discussion.  
+  [#251](https://github.com/BoltsFramework/Bolts-ObjC/pull/251)
+  by [Nikita Lutsenko](https://github.com/nlutsenko)
+- Added temporary API to opt-out from automatic `BFTask` exception catching.  
+  [#251](https://github.com/BoltsFramework/Bolts-ObjC/pull/251)
+  by [Nikita Lutsenko](https://github.com/nlutsenko)
+- Added no-side-effects version of `BFAppLinkNavigation.-navigate:` and `BFAppLinkNavigation.-navigateToAppLink:error:`.  
+  [#245](https://github.com/BoltsFramework/Bolts-ObjC/pull/245)
+  by [Bruno de Carvalho](https://github.com/biasedbit)
+
+**Improved**
+- Improved naming for `BFContinuationBlock` to avoid local variable shadowing.  
+  [#258](https://github.com/BoltsFramework/Bolts-ObjC/pull/258)
+  by [Nikita Lutsenko](https://github.com/nlutsenko)  
+
+**Fixed**
+- Fixed exposure of internal headers in AppLinks subspec.  
+  [#254](https://github.com/BoltsFramework/Bolts-ObjC/pull/254)
+  by [Nikita Lutsenko](https://github.com/nlutsenko)
+- Fixed potential spurious thread wakeup when using `BFTask.-waitUntilFinished`.  
+  [#247](https://github.com/BoltsFramework/Bolts-ObjC/pull/247)
+  by [Nikita Lutsenko](https://github.com/nlutsenko)
+
 ## 1.7.0
 
 **New**

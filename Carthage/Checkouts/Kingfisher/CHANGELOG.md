@@ -2,6 +2,47 @@
 
 -----
 
+## [2.6.0 - Indicator Customization](https://github.com/onevcat/Kingfisher/releases/tag/2.6.0) (2016-09-12)
+
+#### Add
+* Support for different types of indicators, including gif images. [#425](https://github.com/onevcat/Kingfisher/pull/425)
+
+---
+
+## [2.5.1 - Prefetcher Trap](https://github.com/onevcat/Kingfisher/releases/tag/2.5.1) (2016-09-06)
+
+#### Fix
+* Fix a possible trap of range making in prefetcher. [#422](https://github.com/onevcat/Kingfisher/pull/422)
+
+---
+
+## [2.5.0 - Swift 2.3](https://github.com/onevcat/Kingfisher/releases/tag/2.5.0) (2016-08-29)
+
+#### Add
+* Support for Swift 2.3
+
+---
+
+## [2.4.3 - Longer Cache](https://github.com/onevcat/Kingfisher/releases/tag/2.4.3) (2016-08-17)
+
+#### Fix
+* The disk cache now will use access date for expiring checking, which should work better than modification date. [#381](https://github.com/onevcat/Kingfisher/issues/381) [#405](https://github.com/onevcat/Kingfisher/issues/405)
+
+---
+
+## [2.4.2 - Optional Welcome](https://github.com/onevcat/Kingfisher/releases/tag/2.4.2) (2016-07-10)
+
+#### Add
+* Accept `nil` as valid URL parameter for image view's extension methods.
+
+#### Fix
+* The completion handler of image view setting method will not be called any more if `self` is released.
+* Improve empty task so some performance improvment could be achieved.
+* Remove SwiftLint since it keeps adding new rules but without a back compatible support. It makes the users confusing when using a different version of SwiftLint.
+* Removed Implicit Unwrapping of CacheType that caused crashes if the image is not cached.
+
+---
+
 ## [2.4.1 - Force Transition](https://github.com/onevcat/Kingfisher/releases/tag/2.4.1) (2016-05-10)
 
 #### Add

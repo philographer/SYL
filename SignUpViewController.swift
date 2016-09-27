@@ -35,9 +35,9 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
         self.hideKeyboardWhenTappedAround()
         self.viewUpByKeyboard()
         
-        self.userNicknameField.borderStyle = UITextBorderStyle.None
-        self.userEmailField.borderStyle = UITextBorderStyle.None
-        self.userPasswordField.borderStyle = UITextBorderStyle.None
+        self.userNicknameField.borderStyle = UITextBorderStyle.none
+        self.userEmailField.borderStyle = UITextBorderStyle.none
+        self.userPasswordField.borderStyle = UITextBorderStyle.none
         
         
         /*
@@ -67,20 +67,20 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
         
     }
     
-    override func viewWillAppear(animated: Bool) {
-        if (PFUser.currentUser() != nil){
+    override func viewWillAppear(_ animated: Bool) {
+        if (PFUser.current() != nil){
             print("아이디 없음.")
             //self.performSegueWithIdentifier("FromSignToMain", sender: self)
-            dispatch_async(dispatch_get_main_queue()){
+            DispatchQueue.main.async{
                 [unowned self] in
-                self.performSegueWithIdentifier("FromSignToMain", sender: self)
+                self.performSegue(withIdentifier: "FromSignToMain", sender: self)
             }
         }else{
             print("아이디 있음.")
         }
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         
     }
 
@@ -89,29 +89,29 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
         // Dispose of any resources that can be recreated.
     }
     
-    func wrapperDidPress(images: [UIImage]) {
+    func wrapperDidPress(_ images: [UIImage]) {
         
     }
     
-    func doneButtonDidPress(images: [UIImage]) {
+    func doneButtonDidPress(_ images: [UIImage]) {
         print("done")
         self.userSelectImages = images
         self.userPhoto.image = Toucan(image: images[0]).maskWithEllipse().image
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
     }
     
     func cancelButtonDidPress() {
         
     }
-    @IBAction func ImageSelectAction(sender: AnyObject) {
+    @IBAction func ImageSelectAction(_ sender: AnyObject) {
         let imagePickerController = ImagePickerController()
         imagePickerController.delegate = self
         imagePickerController.imageLimit = 1
         Configuration.noImagesTitle = "Sorry! There are no images here!"
-        self.presentViewController(imagePickerController, animated: true, completion: nil)
+        self.present(imagePickerController, animated: true, completion: nil)
     }
     
-    @IBAction func SignUpAction(sender: AnyObject) {
+    @IBAction func SignUpAction(_ sender: AnyObject) {
         self.view.endEditing(true)
         //회원가입할 유저정보 집어넣음
         let user = PFUser()
@@ -119,7 +119,7 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
         user.password = self.userPasswordField.text
         user["nickname"] = self.userNicknameField.text
         
-        UIView.animateWithDuration(1.5, delay: 0, options: .CurveEaseIn, animations: {
+        UIView.animate(withDuration: 1.5, delay: 0, options: .curveEaseIn, animations: {
             self.imageSelecBtn.alpha = 0
             self.userNicknameField.alpha = 0
             self.userPasswordField.alpha = 0
@@ -132,7 +132,7 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
             self.passwordBottom.alpha = 0
             }, completion: nil)
         
-        user.signUpInBackgroundWithBlock({(succeeded: Bool, error: NSError?) -> Void in
+        user.signUpInBackground(block: {(succeeded: Bool, error: NSError?) -> Void in
             let alertView = SCLAlertView()
             alertView.showCloseButton = false
             alertView.addButton("확인", action: {
@@ -146,7 +146,7 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
             }
             else{ //회원가입 성공하면 로그인함
                 print("회원가입 성공")
-                PFUser.logInWithUsernameInBackground(self.userEmailField.text!, password:self.userPasswordField.text!) {
+                PFUser.logInWithUsername(inBackground: self.userEmailField.text!, password:self.userPasswordField.text!) {
                     (user: PFUser?, error: NSError?) -> Void in
                     if user != nil { //로그인 성공했을때
                         //이미지 세팅
@@ -154,10 +154,10 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
                         //let imageData = UIImagePNGRepresentation(self.userPhoto.image!)
                         let imageFile = PFFile(name:"image.png", data:imageData!)!
                         //이미지 업로드
-                        imageFile.saveInBackgroundWithBlock({
+                        imageFile.saveInBackground({
                             (succeeded: Bool, error: NSError?) -> Void in
                             if succeeded == true{
-                                let user = PFUser.currentUser()
+                                let user = PFUser.current()
                                 user!.setObject(imageFile, forKey: "userPhoto")
                                 user?.saveInBackground()
                             }
@@ -169,7 +169,7 @@ class SignUpViewController: UIViewController, ImagePickerDelegate {
                                 (percentDone: Int32) -> Void in
                                 self.progressView.setProgress(Float(percentDone) / 100, animated: true)
                                 print(percentDone)
-                                    if percentDone == 100{self.performSegueWithIdentifier("FromSignToMain", sender: self)
+                                    if percentDone == 100{self.performSegue(withIdentifier: "FromSignToMain", sender: self)
                                     }
                         })
                     } else { //회원가입 실패했을때

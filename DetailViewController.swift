@@ -18,7 +18,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
     @IBOutlet var nameOfArticle: UILabel!
     @IBOutlet var tableView: UITableView!
     var article:PFObject!
-    var comments:[PFObject!] = []
+    var comments:[PFObject?] = []
     var category:String!
     var postId:String!
     var authorNick:String!
@@ -38,7 +38,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.tableFooterView = UIView()
         
         let nowPost = self.article
-        nowPost.fetchIfNeededInBackgroundWithBlock {
+        nowPost.fetchIfNeededInBackground {
             (post: PFObject?, error: NSError?) -> Void in
             self.postId = post?.objectId!
             print("\(self.postId)포스트 아이디")
@@ -70,16 +70,16 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
         super.didReceiveMemoryWarning()
     }
     
-    @IBAction func backButtonAction(sender: AnyObject) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func backButtonAction(_ sender: AnyObject) {
+        self.dismiss(animated: true, completion: nil)
         self.view.endEditing(true)
     }
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 3;
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
         case 0,1: //1,2번째
             return 1
@@ -90,15 +90,15 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
         }
     }
     
-    func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         
         
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        switch indexPath.section {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        switch (indexPath as NSIndexPath).section {
         case 1: //2번째
-            let cell = tableView.dequeueReusableCellWithIdentifier("DetailSecondCell", forIndexPath: indexPath) as! DetailSecondCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DetailSecondCell", for: indexPath) as! DetailSecondCell
             //print("댓글 쓰기 불려짐")
             cell.article = article
             //print(article)
@@ -136,20 +136,20 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
             
             return cell
         case 2: //3번째
-            let cell = tableView.dequeueReusableCellWithIdentifier("DetailThirdCell", forIndexPath: indexPath) as! DetailThirdCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DetailThirdCell", for: indexPath) as! DetailThirdCell
             
-            cell.textField.text = comments[indexPath.row]["comment"] as! String
+            cell.textField.text = comments[(indexPath as NSIndexPath).row]?["comment"] as! String
             // print("코멘트 불려짐")
             
-            let nowUser = comments[indexPath.row]["user"] as! PFObject
+            let nowUser = comments[(indexPath as NSIndexPath).row]?["user"] as! PFObject
             
             print(nowUser)
-            dispatch_async(dispatch_get_main_queue(), {
-                nowUser.fetchIfNeededInBackgroundWithBlock {
+            DispatchQueue.main.async(execute: {
+                nowUser.fetchIfNeededInBackground {
                     (user: PFObject?, error: NSError?) -> Void in
                     if let nowPhoto = user?["userPhoto"]{
                         let unwrapPhoto = nowPhoto as! PFFile
-                        cell.userImage.kf_setImageWithURL(NSURL(string: unwrapPhoto.url!)!)
+                        cell.userImage.kf_setImageWithURL(URL(string: unwrapPhoto.url!)!)
                     }
                     else{
                         cell.userImage.image = UIImage(named: "default-user2")
@@ -162,7 +162,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
             })
             
             
-            let stringDate = (comments[indexPath.row].createdAt!).toNaturalString(NSDate(), inRegion: .None, style: FormatterStyle(style: .Abbreviated, max: 1))!
+            let stringDate = (comments[(indexPath as NSIndexPath).row].createdAt!).toNaturalString(Date(), inRegion: .none, style: FormatterStyle(style: .abbreviated, max: 1))!
             
             cell.time.text = stringDate + "전"
             
@@ -172,7 +172,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
             //print("코멘트 불려짐")
             return cell
         default: //1번째
-            let cell = tableView.dequeueReusableCellWithIdentifier("DetailFirstCell", forIndexPath: indexPath) as! DetailFirstCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DetailFirstCell", for: indexPath) as! DetailFirstCell
             //날짜 파싱
             /*
             let dateFormatter = NSDateFormatter()
@@ -181,7 +181,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
             */
         
             
-            let stringDate = (article.createdAt!).toNaturalString(NSDate(), inRegion: .None, style: FormatterStyle(style: .Abbreviated, max: 1))!
+            let stringDate = (article.createdAt!).toNaturalString(Date(), inRegion: .none, style: FormatterStyle(style: .abbreviated, max: 1))!
             cell.userName.text = self.name
             cell.textView.text = article["content"] as! String
             cell.shareCount.text = String(article["shareCount"] as! Int)
@@ -198,8 +198,8 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
             let pin = MGLPointAnnotation()
             pin.coordinate = center
             cell.mapView.addAnnotation(pin)
-            cell.mapView.setCenterCoordinate(center, zoomLevel: 12, animated: false)
-            cell.mapView.attributionButton.hidden = true
+            cell.mapView.setCenter(center, zoomLevel: 12, animated: false)
+            cell.mapView.attributionButton.isHidden = true
             cell.mapView.styleURL = MGLStyle.lightStyleURL()
             cell.separatorInset = UIEdgeInsetsMake(0.0, 10000, 0.0, cell.bounds.size.width)
             //cell.selectionStyle = .None
@@ -216,18 +216,18 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
              */
             if let image = article["image"]{
                 let unwrapPhoto = image as! PFFile
-                cell.userPhoto!.kf_setImageWithURL(NSURL(string: unwrapPhoto.url!)!, placeholderImage: UIImage(named: "placeholderImage") ,completionHandler:{(image, error, cacheType, imageURL) -> () in
+                cell.userPhoto!.kf_setImageWithURL(URL(string: unwrapPhoto.url!)!, placeholderImage: UIImage(named: "placeholderImage") ,completionHandler:{(image, error, cacheType, imageURL) -> () in
                     
                 })
             }else{
                 //cell.imageConstraint.active = false
-                cell.userPhoto.hidden = true
+                cell.userPhoto.isHidden = true
                 //print("hidden")
             }
             
             //유져정보 가져옴
             let nowUser = article["user"] as! PFObject
-            nowUser.fetchIfNeededInBackgroundWithBlock {
+            nowUser.fetchIfNeededInBackground {
                 (user: PFObject?, error: NSError?) -> Void in
                 if let nowPhoto = user?["userPhoto"]{
                     _ = nowPhoto as! PFFile
@@ -258,22 +258,22 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
                 }
             }
             //print("메인부분 불려짐")
-            cell.selectionStyle = .None
+            cell.selectionStyle = .none
             return cell
         }
     }
     
     
     
-    @IBAction func test(sender: AnyObject) {
+    @IBAction func test(_ sender: AnyObject) {
         //let firstIndexPath = NSIndexPath(forItem: 0, inSection: 0)
         //let firstSection = self.tableView.cellForRowAtIndexPath(firstIndexPath)
         //print(firstSection)
     }
     
-    func mapView(mapView: MGLMapView, imageForAnnotation annotation: MGLAnnotation) -> MGLAnnotationImage? {
+    func mapView(_ mapView: MGLMapView, imageFor annotation: MGLAnnotation) -> MGLAnnotationImage? {
         // Try to reuse the existing ‘pisa’ annotation image, if it exists
-        var annotationImage = mapView.dequeueReusableAnnotationImageWithIdentifier("pin")
+        var annotationImage = mapView.dequeueReusableAnnotationImage(withIdentifier: "pin")
         
         //let thisCategory = self.category
         
@@ -312,7 +312,7 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
             //
             // To make this padding non-interactive, we create another image object
             // with a custom alignment rect that excludes the padding.
-            image = image.imageWithAlignmentRectInsets(UIEdgeInsetsMake(0, 0, image.size.height/2, 0))
+            image = image.withAlignmentRectInsets(UIEdgeInsetsMake(0, 0, image.size.height/2, 0))
             
             // Initialize the ‘pisa’ annotation image with the UIImage we just loaded
             annotationImage = MGLAnnotationImage(image: image, reuseIdentifier: "pin")
@@ -321,17 +321,17 @@ class DetailViewController: UIViewController, UITableViewDataSource, UITableView
         return annotationImage
     }
  
-    @IBAction func deleteAction(sender: AnyObject) {
+    @IBAction func deleteAction(_ sender: AnyObject) {
         let alertView = SCLAlertView()
         alertView.addButton("삭제하기", action: {
             let query = PFQuery(className:"article")
-            query.getObjectInBackgroundWithId(self.article.objectId!) {
+            query.getObjectInBackground(withId: self.article.objectId!) {
                 (thisArticle: PFObject?, error: NSError?) -> Void in
                 if error != nil {
                     print(error)
                 } else if let thisArticle = thisArticle {
                     thisArticle.deleteInBackground()
-                    self.dismissViewControllerAnimated(true, completion: {});
+                    self.dismiss(animated: true, completion: {});
                 }
             }
         })

@@ -32,15 +32,15 @@ class SettingViewController: UIViewController, ImagePickerDelegate {
         self.hideKeyboardWhenTappedAround()
         self.viewUpByKeyboard()
         
-        self.userNickname.borderStyle = UITextBorderStyle.None
-        self.userPassword.borderStyle = UITextBorderStyle.None
+        self.userNickname.borderStyle = UITextBorderStyle.none
+        self.userPassword.borderStyle = UITextBorderStyle.none
         
-        let nowUser = PFUser.currentUser()!
-        nowUser.fetchIfNeededInBackgroundWithBlock {
+        let nowUser = PFUser.current()!
+        nowUser.fetchIfNeededInBackground {
             (user: PFObject?, error: NSError?) -> Void in
             if let nowPhoto = user?["userPhoto"]{
                 let unwrapPhoto = nowPhoto as! PFFile
-                self.userPhoto.kf_setImageWithURL(NSURL(string: unwrapPhoto.url!)!)
+                self.userPhoto.kf_setImageWithURL(URL(string: unwrapPhoto.url!)!)
             }
             if let userName = user?["nickname"]{
                 self.userNickname.text = userName as? String
@@ -54,20 +54,20 @@ class SettingViewController: UIViewController, ImagePickerDelegate {
         // Dispose of any resources that can be recreated.
     }
     
-    @IBAction func BackButtonAction(sender: AnyObject) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func BackButtonAction(_ sender: AnyObject) {
+        self.dismiss(animated: true, completion: nil)
     }
-    @IBAction func imageSelect(sender: AnyObject) {
+    @IBAction func imageSelect(_ sender: AnyObject) {
         let imagePickerController = ImagePickerController()
         imagePickerController.delegate = self
         imagePickerController.imageLimit = 1
         Configuration.noImagesTitle = "Sorry! There are no images here!"
-        self.presentViewController(imagePickerController, animated: true, completion: nil)
+        self.present(imagePickerController, animated: true, completion: nil)
     }
     
-    @IBAction func editAction(sender: AnyObject) {
+    @IBAction func editAction(_ sender: AnyObject) {
         
-        UIView.animateWithDuration(1.5, delay: 0, options: .CurveEaseIn, animations: {
+        UIView.animate(withDuration: 1.5, delay: 0, options: .curveEaseIn, animations: {
             self.imageSelect.alpha = 0
             self.userPhoto.alpha = 0
             self.userNickname.alpha = 0
@@ -82,10 +82,10 @@ class SettingViewController: UIViewController, ImagePickerDelegate {
         //let imageData = UIImagePNGRepresentation(self.userPhoto.image!)
         let imageFile = PFFile(name:"image.png", data:imageData!)!
         //이미지 업로드
-        imageFile.saveInBackgroundWithBlock({
+        imageFile.saveInBackground({
             (succeeded: Bool, error: NSError?) -> Void in
             if succeeded == true{
-                let user = PFUser.currentUser()
+                let user = PFUser.current()
                 user!["nickname"] = self.userNickname.text!
                 user!.setObject(imageFile, forKey: "userPhoto")
                 user?.saveInBackground()
@@ -98,24 +98,24 @@ class SettingViewController: UIViewController, ImagePickerDelegate {
                 (percentDone: Int32) -> Void in
                 self.progressBar.setProgress(Float(percentDone) / 100, animated: true)
                 print(percentDone)
-                if percentDone == 100{self.dismissViewControllerAnimated(true, completion: nil)
+                if percentDone == 100{self.dismiss(animated: true, completion: nil)
                 }
         })
         
     }
     
-    func doneButtonDidPress(images: [UIImage]) {
+    func doneButtonDidPress(_ images: [UIImage]) {
         print("done")
         self.userSelectImages = images
         self.userPhoto.image = Toucan(image: images[0]).maskWithEllipse().image
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
     }
     
     func cancelButtonDidPress() {
         
     }
     
-    func wrapperDidPress(images: [UIImage]) {
+    func wrapperDidPress(_ images: [UIImage]) {
         
     }
     /*

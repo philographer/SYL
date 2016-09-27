@@ -28,7 +28,7 @@ class AlamViewController: UIViewController, UITableViewDelegate, UITableViewData
         
         let query = PFQuery(className: "alarm")
         query.whereKey("read", equalTo: false)
-        query.findObjectsInBackgroundWithBlock{
+        query.findObjectsInBackground{
             (objects: [PFObject]?, error: NSError?) -> Void in
             if let error = error{
                 SCLAlertView().showError("Comment Error", subTitle: "코멘트 가져오기 에러 \(error)")
@@ -46,7 +46,7 @@ class AlamViewController: UIViewController, UITableViewDelegate, UITableViewData
         // Do any additional setup after loading the view.
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         
     }
 
@@ -55,27 +55,27 @@ class AlamViewController: UIViewController, UITableViewDelegate, UITableViewData
         // Dispose of any resources that can be recreated.
     }
     
-    @IBAction func backButtonAction(sender: AnyObject) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func backButtonAction(_ sender: AnyObject) {
+        self.dismiss(animated: true, completion: nil)
     }
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return alarms.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("AlarmCell") as! AlarmCell
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "AlarmCell") as! AlarmCell
         
-        let nowUser = alarms[indexPath.row]["fromUser"] as! PFObject
-        nowUser.fetchIfNeededInBackgroundWithBlock {
+        let nowUser = alarms[(indexPath as NSIndexPath).row]["fromUser"] as! PFObject
+        nowUser.fetchIfNeededInBackground {
             (user: PFObject?, error: NSError?) -> Void in
             if let nowPhoto = user?["userPhoto"]{
                 let unwrapPhoto = nowPhoto as! PFFile
-                cell.userPhoto.kf_setImageWithURL(NSURL(string: unwrapPhoto.url!)!)
+                cell.userPhoto.kf_setImageWithURL(URL(string: unwrapPhoto.url!)!)
             }else{
                 cell.userPhoto.image = UIImage(named: "default-user2")
             }
@@ -83,7 +83,7 @@ class AlamViewController: UIViewController, UITableViewDelegate, UITableViewData
                 let fromName = userName as! String
                 cell.user.sizeToFit()
                 //0이면 댓글 1이면 공유
-                if self.alarms[indexPath.row]["category"] as! Int ==  0{
+                if self.alarms[(indexPath as NSIndexPath).row]["category"] as! Int ==  0{
                     cell.user.text = fromName
                     cell.userMsg.text = "님이 회원님의 게시글에 댓글을 남겼습니다."
                     
@@ -99,7 +99,7 @@ class AlamViewController: UIViewController, UITableViewDelegate, UITableViewData
                 let writeDate = dateFormatter.stringFromDate(self.alarms[indexPath.row].createdAt!)
                 */
                 
-                let stringDate = (self.alarms[indexPath.row].createdAt!).toNaturalString(NSDate(), inRegion: .None, style: FormatterStyle(style: .Abbreviated, max: 1))!
+                let stringDate = (self.alarms[(indexPath as NSIndexPath).row].createdAt!).toNaturalString(Date(), inRegion: .none, style: FormatterStyle(style: .abbreviated, max: 1))!
                 
                 cell.time.text = stringDate + " 전"
                 
@@ -112,41 +112,41 @@ class AlamViewController: UIViewController, UITableViewDelegate, UITableViewData
         return cell
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         //self.performSegueWithIdentifier("FromAlarmToDetail", sender: indexPath)
         
-        alarms[indexPath.row]["article"].fetchInBackgroundWithBlock{
+        (alarms[(indexPath as NSIndexPath).row]["article"] as AnyObject).fetchInBackground{
             (object: PFObject?, error: NSError?) -> Void in
-            self.performSegueWithIdentifier("FromAlarmToDetail", sender: object!)
+            self.performSegue(withIdentifier: "FromAlarmToDetail", sender: object!)
             
         }
         print()
         //destController.article = alarms[indexPath.row]["article"] as! PFObject
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "FromAlarmToDetail"{
-            let destController = segue.destinationViewController as! DetailViewController
+            let destController = segue.destination as! DetailViewController
             
             destController.article = sender as! PFObject
-            destController.category = String(destController.article["category"])
+            destController.category = String(describing: destController.article["category"])
             destController.myName = self.myName
             
-            destController.name = String(destController.article["authorNick"])
-            destController.nameArticle = String(destController.article["authorNick"]) + "님의 글"
+            destController.name = String(describing: destController.article["authorNick"])
+            destController.nameArticle = String(describing: destController.article["authorNick"]) + "님의 글"
             
             let query = PFQuery(className: "comment")
             query.whereKey("article", equalTo: destController.article)
-            query.orderByAscending("createdAt")
-            query.findObjectsInBackgroundWithBlock{
+            query.order(byAscending: "createdAt")
+            query.findObjectsInBackground{
                 (objects: [PFObject]?, error: NSError?) -> Void in
                 if let error = error{
                     SCLAlertView().showError("Comment Error", subTitle: "코멘트 가져오기 에러 \(error)")
                 }
                 else{
                     destController.comments = objects!
-                    let section = NSIndexSet(index: 2)
-                    destController.tableView.reloadSections(section, withRowAnimation: .Automatic)
+                    let section = IndexSet(integer: 2)
+                    destController.tableView.reloadSections(section, with: .automatic)
                 }
             }
             
